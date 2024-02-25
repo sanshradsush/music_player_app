@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
+import '../common/widgets/selected_song_view.dart';
 import '../common/widgets/song_list_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   List<SongModel> songs = [];
 
   Logger logger = Logger();
+
+  SongModel? selectedSong;
 
   @override
   void initState() {
@@ -95,35 +98,90 @@ class _HomePageState extends State<HomePage> {
           ? const Center(
               child: Text('No music files found'),
             )
-          : ListView.separated(
-              itemBuilder: (BuildContext context, int index) {
-                return SongListView(
-                  title: songs[index].title,
-                  artist: songs[index].artist ?? 'Unknown',
-                  onTap: () {},
-                  leadingIcon: FutureBuilder(
-                    future: getArtwork(songs[index].id),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done &&
-                          snapshot.data != null) {
-                        return CircleAvatar(
-                          backgroundImage:
-                              MemoryImage(snapshot.data as Uint8List),
-                        );
-                      } else {
-                        return const CircleAvatar(
-                          backgroundColor: Colors.grey,
-                        );
-                      }
-                    },
+          : Stack(
+              children: [
+                ListView.separated(
+                  itemBuilder: (BuildContext context, int index) {
+                    return SongListView(
+                      title: songs[index].title,
+                      artist: songs[index].artist ?? 'Unknown',
+                      onTap: () {
+                        setState(() {
+                          selectedSong = songs[index];
+                        });
+                      },
+                      leadingIcon: FutureBuilder(
+                        future: getArtwork(songs[index].id),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              snapshot.data != null) {
+                            return CircleAvatar(
+                              backgroundImage:
+                                  MemoryImage(snapshot.data as Uint8List),
+                            );
+                          } else {
+                            return const CircleAvatar(
+                              backgroundColor: Colors.grey,
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  },
+                  separatorBuilder: (BuildContext context, int index) =>
+                      const Divider(
+                    thickness: 0.1,
+                    color: Colors.grey,
                   ),
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) =>
-                  const Divider(
-                color: Colors.grey,
-              ),
-              itemCount: songs.length,
+                  itemCount: songs.length,
+                ),
+                // Overlay Widget
+                if (selectedSong != null)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: Colors.grey,
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            spreadRadius: 2,
+                            blurRadius: 1,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: SelectedSongView(
+                        artist: selectedSong?.artist ?? 'Unknown',
+                        title: selectedSong?.title ?? 'Unknown',
+                        onTap: () {},
+                        leadingIcon: FutureBuilder(
+                          future: getArtwork(selectedSong?.id ?? 0),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                    ConnectionState.done &&
+                                snapshot.data != null) {
+                              return CircleAvatar(
+                                backgroundImage:
+                                    MemoryImage(snapshot.data as Uint8List),
+                              );
+                            } else {
+                              return const CircleAvatar(
+                                backgroundColor: Colors.grey,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
     );
   }
