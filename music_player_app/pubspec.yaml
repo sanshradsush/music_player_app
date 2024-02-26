@@ -11,6 +11,7 @@ dependencies:
 
   cupertino_icons: ^1.0.6
   on_audio_query: ^2.9.0
+  just_audio: ^0.9.9
   permission_handler: ^11.3.0
   logger: ^1.0.0
 

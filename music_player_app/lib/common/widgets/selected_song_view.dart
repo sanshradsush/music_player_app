@@ -5,6 +5,7 @@ class SelectedSongView extends StatelessWidget {
     required this.title,
     required this.artist,
     this.leadingIcon,
+    this.trailingIcon,
     this.onTap,
     super.key,
   });
@@ -12,6 +13,7 @@ class SelectedSongView extends StatelessWidget {
   final String title;
   final String artist;
   final Widget? leadingIcon;
+  final Widget? trailingIcon;
   final void Function()? onTap;
 
   @override
@@ -20,7 +22,7 @@ class SelectedSongView extends StatelessWidget {
       title: Text(title),
       subtitle: Text(artist),
       leading: leadingIcon ?? const Icon(Icons.music_note),
-      trailing: const Icon(Icons.play_arrow),
+      trailing: trailingIcon,
       onTap: onTap,
     );
   }
