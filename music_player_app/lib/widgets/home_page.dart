@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool fileAccess = false;
   final OnAudioQuery audioQuery = OnAudioQuery();
+  AudioPlayer audioPlayer = AudioPlayer();
   List<SongModel> songs = [];
 
   Logger logger = Logger();
@@ -87,8 +89,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void playLocalMusic() async {
+    try {
+      await audioPlayer.stop();
+      await audioPlayer.setFilePath(selectedSong?.data ?? '');
+      await audioPlayer.play();
+    } catch (e) {
+      print('Error playing audio: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -108,7 +121,10 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {
                         setState(() {
                           selectedSong = songs[index];
+                          print(
+                              '\\\nnnnnn \n selectedSong: $selectedSong \n  --> ${selectedSong?.fileExtension}');
                         });
+                        playLocalMusic();
                       },
                       leadingIcon: FutureBuilder(
                         future: getArtwork(songs[index].id),
@@ -160,7 +176,10 @@ class _HomePageState extends State<HomePage> {
                       child: SelectedSongView(
                         artist: selectedSong?.artist ?? 'Unknown',
                         title: selectedSong?.title ?? 'Unknown',
-                        onTap: () {},
+                        onTap: () {
+                          print('dclscnk  ===> ${audioPlayer.playerState.playing}');
+                        },
+                        trailingIcon: audioPlayer.playing ?  const Icon(Icons.pause_rounded): const Icon(Icons.play_arrow),
                         leadingIcon: FutureBuilder(
                           future: getArtwork(selectedSong?.id ?? 0),
                           builder: (context, snapshot) {
