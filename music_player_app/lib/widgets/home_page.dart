@@ -5,8 +5,11 @@ import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
+import '../common/models/audio_model.dart';
 import '../common/widgets/selected_song_view.dart';
 import '../common/widgets/song_list_view.dart';
+import 'left_menu_drawer.dart';
+import 'playing_song_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,17 +21,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool fileAccess = false;
   final OnAudioQuery audioQuery = OnAudioQuery();
-  AudioPlayer audioPlayer = AudioPlayer();
+  final AudioPlayer audioPlayer = AudioPlayerModel.audioPlayer;
   List<SongModel> songs = [];
 
   Logger logger = Logger();
 
   SongModel? selectedSong;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Future<void> didChangeDependencies() async {
@@ -55,7 +53,7 @@ class _HomePageState extends State<HomePage> {
   //   }
   // }
 
-  void checkAndRequestPermissions({bool retry = false}) async {
+  void checkAndRequestPermissions() async {
     // The param 'retryRequest' is false, by default.
     final hasPermission = await audioQuery.permissionsRequest(
       retryRequest: true,
@@ -101,8 +99,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: const LeftMenuDrawer(),
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Music Player'),
@@ -121,8 +121,6 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {
                         setState(() {
                           selectedSong = songs[index];
-                          print(
-                              '\\\nnnnnn \n selectedSong: $selectedSong \n  --> ${selectedSong?.fileExtension}');
                         });
                         playLocalMusic();
                       },
@@ -137,9 +135,7 @@ class _HomePageState extends State<HomePage> {
                                   MemoryImage(snapshot.data as Uint8List),
                             );
                           } else {
-                            return const CircleAvatar(
-                              backgroundColor: Colors.grey,
-                            );
+                            return const Icon(Icons.music_note);
                           }
                         },
                       ),
@@ -177,9 +173,16 @@ class _HomePageState extends State<HomePage> {
                         artist: selectedSong?.artist ?? 'Unknown',
                         title: selectedSong?.title ?? 'Unknown',
                         onTap: () {
-                          print('dclscnk  ===> ${audioPlayer.playerState.playing}');
+                          _scaffoldKey.currentState?.showBottomSheet(
+                            (context) => PlayingSongScreen(
+                              selectedSong: selectedSong,
+                            ),
+                            enableDrag: true,
+                          );
                         },
-                        trailingIcon: audioPlayer.playing ?  const Icon(Icons.pause_rounded): const Icon(Icons.play_arrow),
+                        trailingIcon: audioPlayer.playing
+                            ? const Icon(Icons.pause_rounded)
+                            : const Icon(Icons.play_arrow),
                         leadingIcon: FutureBuilder(
                           future: getArtwork(selectedSong?.id ?? 0),
                           builder: (context, snapshot) {

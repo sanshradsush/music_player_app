@@ -19,7 +19,7 @@ class SongListView extends StatelessWidget {
     return ListTile(
       title: Text(title),
       subtitle: Text(artist),
-      leading: leadingIcon ?? const Icon(Icons.music_note),
+      leading: leadingIcon,
       onTap: onTap,
     );
   }

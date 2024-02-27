@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:music_player_app/widgets/home_page.dart';
+
+import 'widgets/home_page.dart';
 
 void main() {
   runApp(const MyApp());
