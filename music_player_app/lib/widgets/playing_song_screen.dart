@@ -41,30 +41,33 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
             title: widget.selectedSong?.title ?? 'Unknown',
             artist: widget.selectedSong?.artist ?? 'Unknown',
             leadingIcon: const Icon(Icons.music_note),
-            trailingIcon: const Icon(Icons.play_arrow),
           ),
-          FutureBuilder(
-            future: getArtwork(widget.selectedSong?.id ?? 0),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done &&
-                  snapshot.data != null) {
-                return Container(
-                  height: 300,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.circular(
-                      10.0,
-                    ), // Adjust the radius as needed
-                    image: DecorationImage(
-                      image: MemoryImage(snapshot.data as Uint8List),
-                      fit: BoxFit.cover,
+          Expanded(
+            child: FutureBuilder(
+              future: getArtwork(widget.selectedSong?.id ?? 0),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.data != null) {
+                  return Container(
+                    margin: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 1,
+                      ),
+                      // Adjust the radius as needed
+                      image: DecorationImage(
+                        image: MemoryImage(snapshot.data as Uint8List),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                );
-              } else {
-                return const Icon(Icons.music_note);
-              }
-            },
+                  );
+                } else {
+                  return const Icon(Icons.music_note);
+                }
+              },
+            ),
           ),
           const SizedBox(height: 20),
           // Progress bar
@@ -72,22 +75,27 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
             builder: (context, audioModel, child) {
               return Column(
                 children: [
-                  Slider(
-                    value: audioModel.currentPosition,
-                    min: 0,
-                    max: audioModel.totalDuration,
-                    onChanged: (value) {
-                      audioModel.seekTo(value);
-                    },
-                  ),
-                  
                   Padding(
-                    padding: const EdgeInsets.only(right: 20.0, left: 20.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text((audioModel.currentPosition/60).toStringAsFixed(2)),
-                        Text((audioModel.totalDuration/60).toStringAsFixed(2)),
+                        Text(
+                          (audioModel.currentPosition / 60).toStringAsFixed(2),
+                        ),
+                        Expanded(
+                          child: Slider(
+                            value: audioModel.currentPosition,
+                            min: 0,
+                            max: audioModel.totalDuration,
+                            onChanged: (value) {
+                              audioModel.seekTo(value);
+                            },
+                          ),
+                        ),
+                        Text(
+                          (audioModel.totalDuration / 60).toStringAsFixed(2),
+                        ),
                       ],
                     ),
                   ),
@@ -118,9 +126,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
               IconButton(
                 icon: const Icon(Icons.skip_next),
                 onPressed: () {
-                  setState(() {
-                    
-                  });
+                  setState(() {});
                 },
               ),
             ],
