@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 
@@ -26,9 +27,14 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
           .queryArtwork(songId, ArtworkType.AUDIO, size: 200);
       return artwork;
     } catch (e) {
-      print('Error fetching artwork: $e');
+      Logger().e('Error fetching artwork: $e');
       return null;
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -81,7 +87,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(
-                          (audioModel.currentPosition / 60).toStringAsFixed(2),
+                          '${audioModel.currentPosition ~/ 60}:${(audioModel.currentPosition % 60).toInt().toString().padLeft(2, '0')}',
                         ),
                         Expanded(
                           child: Slider(
@@ -89,12 +95,12 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
                             min: 0,
                             max: audioModel.totalDuration,
                             onChanged: (value) {
-                              audioModel.seekTo(value);
+                              audioModel.seekTo(value.toDouble());
                             },
                           ),
                         ),
                         Text(
-                          (audioModel.totalDuration / 60).toStringAsFixed(2),
+                          '${audioModel.totalDuration ~/ 60}:${(audioModel.totalDuration % 60).toInt().toString().padLeft(2, '0')}',
                         ),
                       ],
                     ),
@@ -136,3 +142,4 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
     );
   }
 }
+
