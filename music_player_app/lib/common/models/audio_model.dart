@@ -5,6 +5,7 @@ class AudioPlayerModel extends ChangeNotifier {
   static final _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   double _currentPosition = 0.0;
+  bool _disposed = false;
 
   double get totalDuration =>
       (_audioPlayer.duration?.inSeconds ?? 0).toDouble();
@@ -19,13 +20,13 @@ class AudioPlayerModel extends ChangeNotifier {
       } else {
         _isPlaying = false;
       }
-      notifyListeners();
+      if (_disposed == false) notifyListeners();
     });
 
     _audioPlayer.positionStream.listen((Duration position) {
       // Handle position changes
       _currentPosition = position.inSeconds.toDouble();
-      notifyListeners();
+      if (_disposed == false) notifyListeners();
     });
   }
 
@@ -53,10 +54,7 @@ class AudioPlayerModel extends ChangeNotifier {
 
   @override
   void dispose() {
-
-    print('sandeep \n\n\n ---> disopose');
+    _disposed = true;
     super.dispose();
-    _audioPlayer.playerStateStream.listen(null).cancel();
-    _audioPlayer.positionStream.listen(null).cancel();
   }
 }
