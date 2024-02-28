@@ -32,13 +32,17 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  String convertSecondsToMinutesAndSeconds(int seconds) {
+    Duration duration = Duration(milliseconds: seconds);
+    int minutes = duration.inMinutes;
+    int remainingSeconds = duration.inSeconds % 60;
+
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
+    // convertSecondsToMinutesAndSeconds(widget.selectedSong?.duration ?? 0);
     return ChangeNotifierProvider(
       create: (context) => AudioPlayerModel(),
       child: Column(
@@ -93,14 +97,18 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
                           child: Slider(
                             value: audioModel.currentPosition,
                             min: 0,
-                            max: audioModel.totalDuration,
-                            onChanged: (value) {
+                            max: Duration(
+                              milliseconds: widget.selectedSong?.duration ?? 0,
+                            ).inSeconds.toDouble(),
+                            onChanged: (value) async {
+                              audioModel.currentPosition = value;
                               audioModel.seekTo(value.toDouble());
                             },
                           ),
                         ),
                         Text(
-                          '${audioModel.totalDuration ~/ 60}:${(audioModel.totalDuration % 60).toInt().toString().padLeft(2, '0')}',
+                          convertSecondsToMinutesAndSeconds(
+                              widget.selectedSong?.duration ?? 0),
                         ),
                       ],
                     ),
@@ -123,8 +131,12 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
                     icon: audioModel.isPlaying
                         ? const Icon(Icons.pause)
                         : const Icon(Icons.play_arrow),
-                    onPressed: () {
-                      audioModel.togglePlayPause();
+                    onPressed: () async {
+                      if (audioModel.currentPosition > 0.0) {
+                        audioModel.togglePlayPause();
+                      } else {
+                        await audioModel.playLocalMusic(widget.selectedSong?.data);
+                      }
                     },
                   );
                 },
@@ -142,4 +154,3 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
     );
   }
 }
-

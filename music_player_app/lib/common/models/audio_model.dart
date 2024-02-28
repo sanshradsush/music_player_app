@@ -11,15 +11,16 @@ class AudioPlayerModel extends ChangeNotifier {
       (_audioPlayer.duration?.inSeconds ?? 0).toDouble();
   double get currentPosition => _currentPosition;
 
+  set currentPosition(double value) {
+    _currentPosition = value;
+    notifyListeners();
+  }
+
   bool get isPlaying => _isPlaying;
 
   AudioPlayerModel() {
     _audioPlayer.playerStateStream.listen((PlayerState state) {
-      if (state.playing) {
-        _isPlaying = true;
-      } else {
-        _isPlaying = false;
-      }
+      _isPlaying = state.playing;
       if (_disposed == false) notifyListeners();
     });
 
@@ -38,11 +39,11 @@ class AudioPlayerModel extends ChangeNotifier {
     }
   }
 
-  void seekTo(double value) {
-    _audioPlayer.seek(Duration(seconds: value.toInt()));
+  Future<void> seekTo(double value) async {
+    await _audioPlayer.seek(Duration(seconds: value.toInt()));
   }
 
-  void playLocalMusic(String? path) async {
+  Future<void> playLocalMusic(String? path) async {
     try {
       await _audioPlayer.stop();
       await _audioPlayer.setFilePath(path ?? '');
