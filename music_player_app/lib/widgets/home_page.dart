@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
@@ -21,7 +20,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool fileAccess = false;
   final OnAudioQuery audioQuery = OnAudioQuery();
-  final AudioPlayer audioPlayer = AudioPlayerModel.audioPlayer;
   List<SongModel> songs = [];
 
   Logger logger = Logger();
@@ -86,17 +84,7 @@ class _HomePageState extends State<HomePage> {
       return null;
     }
   }
-
-  void playLocalMusic() async {
-    try {
-      await audioPlayer.stop();
-      await audioPlayer.setFilePath(selectedSong?.data ?? '');
-      await audioPlayer.play();
-    } catch (e) {
-      print('Error playing audio: $e');
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -122,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                         setState(() {
                           selectedSong = songs[index];
                         });
-                        playLocalMusic();
+                       AudioPlayerModel().playLocalMusic(selectedSong?.data);
                       },
                       leadingIcon: FutureBuilder(
                         future: getArtwork(songs[index].id),
@@ -180,7 +168,7 @@ class _HomePageState extends State<HomePage> {
                             enableDrag: true,
                           );
                         },
-                        trailingIcon: audioPlayer.playing
+                        trailingIcon: AudioPlayerModel().isPlaying
                             ? const Icon(Icons.pause_rounded)
                             : const Icon(Icons.play_arrow),
                         leadingIcon: FutureBuilder(
