@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../common/models/audio_model.dart';
 import '../common/widgets/selected_song_view.dart';
@@ -29,48 +31,47 @@ class _HomePageState extends State<HomePage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    // await requestPermissions();
-    checkAndRequestPermissions();
+    var status = await Permission.audio.status.isGranted ||
+        await Permission.storage.status.isGranted;
+    if (status) {
+      await fetchAudioFiles();
+      setState(() {
+        fileAccess = true;
+      });
+    }
   }
 
-  // Future<void> requestPermissions() async {
-  //   // Request storage permissions
-  //   Map<Permission, PermissionStatus> statuses = await [
-  //     Permission
-  //         .storage, // For READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE
-  //     // Add more permissions as needed
-  //   ].request();
+  Future<void> requestPermissions() async {
+    final deviceInfo = DeviceInfoPlugin();
 
-  //   // Check the status of each permission
-  //   if (statuses[Permission.storage] != PermissionStatus.granted) {
-  //     // Handle the case when the storage permission is not granted
-  //     print('Storage permission not granted');
-  //   } else {
-  //     // The storage permission is granted, you can proceed with file and media access
-  //     print('Storage permission granted');
-  //   }
-  // }
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    Map<Permission, PermissionStatus> statuses = await [
+      int.parse(androidInfo.version.release) > 12
+          ? Permission.audio
+          : Permission.storage,
+    ].request();
 
-  void checkAndRequestPermissions() async {
-    // The param 'retryRequest' is false, by default.
-    final hasPermission = await audioQuery.permissionsRequest(
-      retryRequest: true,
-    );
-
-    if (hasPermission) {
+    // Check the status of each permission
+    if (statuses[Permission.audio] == PermissionStatus.granted ||
+        statuses[Permission.storage] == PermissionStatus.granted) {
+      logger.d('Storage permission granted');
       await fetchAudioFiles();
-      logger.i('Permission granted');
+      setState(() {
+        fileAccess = true;
+      });
     } else {
-      logger.e('Permission denied');
+      logger.e('Storage permission not granted');
     }
   }
 
   Future<void> fetchAudioFiles() async {
     try {
       songs = await audioQuery.querySongs();
-      setState(() {});
+      logger.i(' audio files fetched successfully from the device');
     } catch (e) {
       logger.e('Error fetching audio files: $e');
+    } finally {
+      setState(() {});
     }
   }
 
@@ -80,11 +81,11 @@ class _HomePageState extends State<HomePage> {
           await audioQuery.queryArtwork(songId, ArtworkType.AUDIO, size: 200);
       return artwork;
     } catch (e) {
-      print('Error fetching artwork: $e');
+      logger.e('Error fetching artwork: $e');
       return null;
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -96,10 +97,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Music Player'),
       ),
       body: fileAccess
-          ? const Center(
-              child: Text('No music files found'),
-            )
-          : Stack(
+          ? Stack(
               children: [
                 ListView.separated(
                   itemBuilder: (BuildContext context, int index) {
@@ -110,7 +108,7 @@ class _HomePageState extends State<HomePage> {
                         setState(() {
                           selectedSong = songs[index];
                         });
-                       AudioPlayerModel().playLocalMusic(selectedSong?.data);
+                        AudioPlayerModel().playLocalMusic(selectedSong?.data);
                       },
                       leadingIcon: FutureBuilder(
                         future: getArtwork(songs[index].id),
@@ -192,6 +190,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
               ],
+            )
+          : Center(
+              child: TextButton(
+                  onPressed: () async {
+                    await requestPermissions();
+                  },
+                  child: const Text('Allow')),
             ),
     );
   }
