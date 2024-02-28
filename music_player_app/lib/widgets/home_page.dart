@@ -7,6 +7,7 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../common/models/audio_model.dart';
+import '../common/models/shared_data_model.dart';
 import '../common/widgets/selected_song_view.dart';
 import '../common/widgets/song_list_view.dart';
 import 'left_menu_drawer.dart';
@@ -39,6 +40,19 @@ class _HomePageState extends State<HomePage> {
         fileAccess = true;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updateSelectedSongFromLocalStorage();
+  }
+
+  Future<void> updateSelectedSongFromLocalStorage() async {
+    final song = await LocalSavingDataModel().getCurrentPlayingSong();
+    setState(() {
+      selectedSong = song;
+    });
   }
 
   Future<void> requestPermissions() async {
@@ -104,7 +118,9 @@ class _HomePageState extends State<HomePage> {
                     return SongListView(
                       title: songs[index].title,
                       artist: songs[index].artist ?? 'Unknown',
-                      onTap: () {
+                      onTap: () async {
+                        await LocalSavingDataModel()
+                            .updateCurrentPlayingSong(songs[index]);
                         setState(() {
                           selectedSong = songs[index];
                         });
