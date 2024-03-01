@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class AudioPlayerModel extends ChangeNotifier {
   static final _audioPlayer = AudioPlayer();
@@ -10,6 +11,15 @@ class AudioPlayerModel extends ChangeNotifier {
   double get totalDuration =>
       (_audioPlayer.duration?.inSeconds ?? 0).toDouble();
   double get currentPosition => _currentPosition;
+
+  SongModel? _currentSong;
+
+  SongModel? get currentSong => _currentSong;
+
+  set currentSong(SongModel? value) {
+    _currentSong = value;
+    notifyListeners();
+  }
 
   set currentPosition(double value) {
     _currentPosition = value;
@@ -29,6 +39,7 @@ class AudioPlayerModel extends ChangeNotifier {
       _currentPosition = position.inSeconds.toDouble();
       if (_disposed == false) notifyListeners();
     });
+    
   }
 
   void togglePlayPause() {

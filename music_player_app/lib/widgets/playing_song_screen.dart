@@ -11,16 +11,29 @@ import '../common/widgets/selected_song_view.dart';
 class PlayingSongScreen extends StatefulWidget {
   const PlayingSongScreen({
     required this.selectedSong,
+    required this.playNext,
+    required this.playPrevious,
     super.key,
   });
 
   final SongModel? selectedSong;
+  final VoidCallback playNext;
+  final VoidCallback playPrevious;
 
   @override
   State<PlayingSongScreen> createState() => _PlayingSongScreenState();
 }
 
 class _PlayingSongScreenState extends State<PlayingSongScreen> {
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+   setState(() {
+     
+   });
+  }
+
   Future<Uint8List?> getArtwork(int songId) async {
     try {
       final Uint8List? artwork = await OnAudioQuery()
@@ -44,112 +57,112 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
   Widget build(BuildContext context) {
     // convertSecondsToMinutesAndSeconds(widget.selectedSong?.duration ?? 0);
     return ChangeNotifierProvider(
-      create: (context) => AudioPlayerModel(),
-      child: Column(
-        children: [
-          SelectedSongView(
-            title: widget.selectedSong?.title ?? 'Unknown',
-            artist: widget.selectedSong?.artist ?? 'Unknown',
-            leadingIcon: const Icon(Icons.music_note),
-          ),
-          Expanded(
-            child: FutureBuilder(
-              future: getArtwork(widget.selectedSong?.id ?? 0),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.data != null) {
-                  return Container(
-                    margin: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 1,
+        create: (context) => AudioPlayerModel(),
+        child:  Column(
+          children: [
+            SelectedSongView(
+              title: widget.selectedSong?.title ?? 'Unknown',
+              artist: widget.selectedSong?.artist ?? 'Unknown',
+              leadingIcon: const Icon(Icons.music_note),
+            ),
+            Expanded(
+              child: FutureBuilder(
+                future: getArtwork(widget.selectedSong?.id ?? 0),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.data != null) {
+                    return Container(
+                      margin: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        border: Border.all(
+                          color: Colors.black,
+                          width: 1,
+                        ),
+                        // Adjust the radius as needed
+                        image: DecorationImage(
+                          image: MemoryImage(snapshot.data as Uint8List),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      // Adjust the radius as needed
-                      image: DecorationImage(
-                        image: MemoryImage(snapshot.data as Uint8List),
-                        fit: BoxFit.cover,
+                    );
+                  } else {
+                    return const Icon(Icons.music_note);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Progress bar
+            Consumer<AudioPlayerModel>(
+              builder: (context, audioModel, child) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            '${audioModel.currentPosition ~/ 60}:${(audioModel.currentPosition % 60).toInt().toString().padLeft(2, '0')}',
+                          ),
+                          Expanded(
+                            child: Slider(
+                              value: audioModel.currentPosition,
+                              min: 0,
+                              max: Duration(
+                                milliseconds: widget.selectedSong?.duration ?? 0,
+                              ).inSeconds.toDouble(),
+                              onChanged: (value) async {
+                                audioModel.currentPosition = value;
+                                audioModel.seekTo(value.toDouble());
+                              },
+                            ),
+                          ),
+                          Text(
+                            convertSecondsToMinutesAndSeconds(
+                                widget.selectedSong?.duration ?? 0),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                } else {
-                  return const Icon(Icons.music_note);
-                }
+                  ],
+                );
               },
             ),
-          ),
-          const SizedBox(height: 20),
-          // Progress bar
-          Consumer<AudioPlayerModel>(
-            builder: (context, audioModel, child) {
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(
-                          '${audioModel.currentPosition ~/ 60}:${(audioModel.currentPosition % 60).toInt().toString().padLeft(2, '0')}',
-                        ),
-                        Expanded(
-                          child: Slider(
-                            value: audioModel.currentPosition,
-                            min: 0,
-                            max: Duration(
-                              milliseconds: widget.selectedSong?.duration ?? 0,
-                            ).inSeconds.toDouble(),
-                            onChanged: (value) async {
-                              audioModel.currentPosition = value;
-                              audioModel.seekTo(value.toDouble());
-                            },
-                          ),
-                        ),
-                        Text(
-                          convertSecondsToMinutesAndSeconds(
-                              widget.selectedSong?.duration ?? 0),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.skip_previous),
-                onPressed: () {},
-              ),
-              Consumer<AudioPlayerModel>(
-                builder: (context, audioModel, child) {
-                  return IconButton(
-                    icon: audioModel.isPlaying
-                        ? const Icon(Icons.pause)
-                        : const Icon(Icons.play_arrow),
-                    onPressed: () async {
-                      if (audioModel.currentPosition > 0.0) {
-                        audioModel.togglePlayPause();
-                      } else {
-                        await audioModel.playLocalMusic(widget.selectedSong?.data);
-                      }
-                    },
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.skip_next),
-                onPressed: () {
-                  setState(() {});
-                },
-              ),
-            ],
-          ),
-        ],
+      
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.skip_previous),
+                  onPressed: widget.playPrevious,
+                ),
+                Consumer<AudioPlayerModel>(
+                  builder: (context, audioModel, child) {
+                    return IconButton(
+                      icon: audioModel.isPlaying
+                          ? const Icon(Icons.pause)
+                          : const Icon(Icons.play_arrow),
+                      onPressed: () async {
+                        if (audioModel.currentPosition > 0.0) {
+                          audioModel.togglePlayPause();
+                        } else {
+                          await audioModel
+                              .playLocalMusic(widget.selectedSong?.data);
+                        }
+                      },
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.skip_next),
+                  onPressed: widget.playNext,
+                ),
+              ],
+            ),
+          ],
+        // ),
       ),
     );
   }

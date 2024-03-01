@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:music_player_app/common/models/audio_model.dart';
+import 'package:provider/provider.dart';
 
 import 'widgets/home_page.dart';
 
