@@ -3,8 +3,10 @@ import 'dart:typed_data';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:music_player_app/common/models/side_bar_model.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 import '../common/models/audio_model.dart';
 import '../common/models/shared_data_model.dart';
@@ -28,6 +30,9 @@ class _HomePageState extends State<HomePage> {
   Logger logger = Logger();
 
   SongModel? selectedSong;
+  bool selectedSongLiked = false;
+
+  SideBar sideBar = SideBar.allSongs;
 
   @override
   Future<void> didChangeDependencies() async {
@@ -35,7 +40,7 @@ class _HomePageState extends State<HomePage> {
     var status = await Permission.audio.status.isGranted ||
         await Permission.storage.status.isGranted;
     if (status) {
-      await fetchAudioFiles();
+      await fetchAudioFiles(sideBar);
       setState(() {
         fileAccess = true;
       });
@@ -50,9 +55,13 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> updateSelectedSongFromLocalStorage() async {
     final song = await LocalSavingDataModel().getCurrentPlayingSong();
-    setState(() {
-      selectedSong = song;
-    });
+    if (song != null) {
+      final isLiked = await LocalSavingDataModel().checkForLikedSong(song);
+      setState(() {
+        selectedSong = song;
+        selectedSongLiked = isLiked;
+      });
+    }
   }
 
   Future<void> requestPermissions() async {
@@ -69,7 +78,7 @@ class _HomePageState extends State<HomePage> {
     if (statuses[Permission.audio] == PermissionStatus.granted ||
         statuses[Permission.storage] == PermissionStatus.granted) {
       logger.d('Storage permission granted');
-      await fetchAudioFiles();
+      await fetchAudioFiles(sideBar);
       setState(() {
         fileAccess = true;
       });
@@ -78,10 +87,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> fetchAudioFiles() async {
+  Future<void> fetchAudioFiles(SideBar sideBar) async {
     try {
-      songs = await audioQuery.querySongs();
-      logger.i(' audio files fetched successfully from the device');
+      if (sideBar == SideBar.allSongs) {
+        songs = await audioQuery.querySongs();
+      } else if (sideBar == SideBar.likedSong) {
+        songs = await LocalSavingDataModel().getLikedSongs();
+      }
+
+      logger.i(
+          ' ${sideBar.getFieldName()} audio files fetched successfully from the device');
     } catch (e) {
       logger.e('Error fetching audio files: $e');
     } finally {
@@ -100,93 +115,66 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> playMusic(SongModel? selectedSong) async {
+    try {
+      await AudioPlayerModel().playLocalMusic(selectedSong?.data ?? '');
+    } catch (e) {
+      logger.e('Error playing audio: $e');
+    }
+  }
+
+  Future<void> playWithShuffle() async {
+    final shuffleSongs = List.from(songs);
+    shuffleSongs.shuffle();
+    final selected = selectedSong != shuffleSongs.first
+        ? shuffleSongs.first
+        : shuffleSongs.last;
+    await LocalSavingDataModel().updateCurrentPlayingSong(selected);
+    final isLiked = await LocalSavingDataModel().checkForLikedSong(selected);
+    setState(() {
+      selectedSong = selected;
+      selectedSongLiked = isLiked;
+    });
+
+    await playMusic(selectedSong);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: const LeftMenuDrawer(),
+      key: scaffoldKey,
+      drawer: LeftMenuDrawer(
+        onTap: (sideBar) async {
+          await fetchAudioFiles(sideBar);
+          this.sideBar = sideBar;
+        },
+      ),
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Music Player'),
       ),
-      body: fileAccess
-          ? Stack(
-              children: [
-                ListView.separated(
-                  itemBuilder: (BuildContext context, int index) {
-                    return SongListView(
-                      title: songs[index].title,
-                      artist: songs[index].artist ?? 'Unknown',
-                      onTap: () async {
-                        await LocalSavingDataModel()
-                            .updateCurrentPlayingSong(songs[index]);
-                        setState(() {
-                          selectedSong = songs[index];
-                        });
-                        AudioPlayerModel().playLocalMusic(selectedSong?.data);
-                      },
-                      leadingIcon: FutureBuilder(
-                        future: getArtwork(songs[index].id),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.done &&
-                              snapshot.data != null) {
-                            return CircleAvatar(
-                              backgroundImage:
-                                  MemoryImage(snapshot.data as Uint8List),
-                            );
-                          } else {
-                            return const Icon(Icons.music_note);
-                          }
+      body: ChangeNotifierProvider(
+        create: (context) => AudioPlayerModel(),
+        child: fileAccess
+            ? Stack(
+                children: [
+                  ListView.separated(
+                    itemBuilder: (BuildContext context, int index) {
+                      return SongListView(
+                        title: songs[index].title,
+                        artist: songs[index].artist ?? 'Unknown',
+                        onTap: () async {
+                          await LocalSavingDataModel()
+                              .updateCurrentPlayingSong(songs[index]);
+                          setState(() {
+                            selectedSong = songs[index];
+                          });
+                          await playMusic(selectedSong);
                         },
-                      ),
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) =>
-                      const Divider(
-                    thickness: 0.1,
-                    color: Colors.grey,
-                  ),
-                  itemCount: songs.length,
-                ),
-                // Overlay Widget
-                if (selectedSong != null)
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: Colors.grey,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            spreadRadius: 2,
-                            blurRadius: 1,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: SelectedSongView(
-                        artist: selectedSong?.artist ?? 'Unknown',
-                        title: selectedSong?.title ?? 'Unknown',
-                        onTap: () {
-                          _scaffoldKey.currentState?.showBottomSheet(
-                            (context) => PlayingSongScreen(
-                              selectedSong: selectedSong,
-                            ),
-                            enableDrag: true,
-                          );
-                        },
-                        trailingIcon: AudioPlayerModel().isPlaying
-                            ? const Icon(Icons.pause_rounded)
-                            : const Icon(Icons.play_arrow),
                         leadingIcon: FutureBuilder(
-                          future: getArtwork(selectedSong?.id ?? 0),
+                          future: getArtwork(songs[index].id),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                     ConnectionState.done &&
@@ -196,24 +184,119 @@ class _HomePageState extends State<HomePage> {
                                     MemoryImage(snapshot.data as Uint8List),
                               );
                             } else {
-                              return const CircleAvatar(
-                                backgroundColor: Colors.grey,
-                              );
+                              return const Icon(Icons.music_note);
                             }
+                          },
+                        ),
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const Divider(
+                      thickness: 0.1,
+                      color: Colors.grey,
+                    ),
+                    itemCount: songs.length,
+                  ),
+                  // Overlay Widget
+                  if (selectedSong != null)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Colors.grey,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              spreadRadius: 2,
+                              blurRadius: 1,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Consumer<AudioPlayerModel>(
+                          builder: (context, audioModel, child) {
+                            return SelectedSongView(
+                              artist: selectedSong?.artist ?? 'Unknown',
+                              title: selectedSong?.title ?? 'Unknown',
+                              onTap: () {
+                                showModalBottomSheet<void>(
+                                  context: context,
+                                  builder: (context) {
+                                    return PlayingSongScreen(
+                                      selectedSong: selectedSong,
+                                      playNext: () async {
+                                        playWithShuffle();
+                                      },
+                                      playPrevious: () async {
+                                        playWithShuffle();
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              trailingIcon: IconButton(
+                                onPressed: () async {
+                                  final isLiked = await LocalSavingDataModel()
+                                      .addLikedSong(selectedSong!);
+                                  if (isLiked) {
+                                    setState(() {
+                                      songs.add(selectedSong!);
+                                    });
+                                  }
+                                },
+                                icon: selectedSongLiked
+                                    ? const Icon(Icons.favorite)
+                                    : const Icon(Icons.favorite),
+                              ),
+                              //  Row(children: [
+                              //   IconButton(
+                              //     onPressed: () {
+                              //       print('loked ---> ');
+                              //     },
+                              //     icon: const Icon(Icons.heart_broken_sharp)
+                              //   ),
+                              //   audioModel.isPlaying
+                              //       ? const Icon(Icons.pause_rounded)
+                              //       : const Icon(Icons.play_arrow),
+                              // ]),
+                              leadingIcon: FutureBuilder(
+                                future: getArtwork(selectedSong?.id ?? 0),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                          ConnectionState.done &&
+                                      snapshot.data != null) {
+                                    return CircleAvatar(
+                                      backgroundImage: MemoryImage(
+                                          snapshot.data as Uint8List),
+                                    );
+                                  } else {
+                                    return const CircleAvatar(
+                                      backgroundColor: Colors.grey,
+                                    );
+                                  }
+                                },
+                              ),
+                            );
                           },
                         ),
                       ),
                     ),
-                  ),
-              ],
-            )
-          : Center(
-              child: TextButton(
+                ],
+              )
+            : Center(
+                child: TextButton(
                   onPressed: () async {
                     await requestPermissions();
                   },
-                  child: const Text('Allow')),
-            ),
+                  child: const Text('Allow'),
+                ),
+              ),
+      ),
     );
   }
 }
