@@ -28,6 +28,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool fileAccess = false;
   final OnAudioQuery audioQuery = OnAudioQuery();
+  LocalSavingDataModel localSavingDataModel = LocalSavingDataModel();
+  AudioPlayerModel audioPlayerModel = AudioPlayerModel();
   List<SongModel> songs = [];
 
   Logger logger = Logger();
@@ -57,9 +59,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> updateSelectedSongFromLocalStorage() async {
-    final song = await LocalSavingDataModel().getCurrentPlayingSong();
+    final song = await localSavingDataModel.getCurrentPlayingSong();
     if (song != null) {
-      final isLiked = await LocalSavingDataModel().checkForLikedSong(song);
+      final isLiked = await localSavingDataModel.checkForLikedSong(song);
       setState(() {
         selectedSong = song;
         selectedSongLiked = isLiked;
@@ -101,30 +103,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> playMusic(SongModel? selectedSong) async {
-    try {
-      await AudioPlayerModel().playLocalMusic(selectedSong?.data ?? '');
-    } catch (e) {
-      logger.e('Error playing audio: $e');
-    }
-  }
-
-  Future<void> playWithShuffle() async {
-    final shuffleSongs = List.from(songs);
-    shuffleSongs.shuffle();
-    final selected = selectedSong != shuffleSongs.first
-        ? shuffleSongs.first
-        : shuffleSongs.last;
-    await LocalSavingDataModel().updateCurrentPlayingSong(selected);
-    final isLiked = await LocalSavingDataModel().checkForLikedSong(selected);
-    setState(() {
-      selectedSong = selected;
-      selectedSongLiked = isLiked;
-    });
-
-    await playMusic(selectedSong);
-  }
-
   @override
   Widget build(BuildContext context) {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -154,12 +132,10 @@ class _HomePageState extends State<HomePage> {
                   title: songs[index].title,
                   artist: songs[index].artist ?? 'Unknown',
                   onTap: () async {
-                    await LocalSavingDataModel()
-                        .updateCurrentPlayingSong(songs[index]);
+                    audioPlayerModel.currentSong = songs[index];
                     setState(() {
                       selectedSong = songs[index];
                     });
-                    await playMusic(selectedSong);
                   },
                   leadingIcon: FutureBuilder(
                     future: getArtwork(songs[index].id),
@@ -211,24 +187,24 @@ class _HomePageState extends State<HomePage> {
                         artist: selectedSong?.artist ?? 'Unknown',
                         title: selectedSong?.title ?? 'Unknown',
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PlayingSongScreen(
+                          showModalBottomSheet<SongModel>(
+                            isScrollControlled: true,
+                            context: context,
+                            builder: (context) {
+                              return PlayingSongScreen(
                                 selectedSong: selectedSong,
-                                playNext: () async {
-                                  playWithShuffle();
-                                },
-                                playPrevious: () async {
-                                  playWithShuffle();
-                                },
-                              ),
-                            ),
-                          );
+                                songList: songs,
+                              );
+                            },
+                          ).then((currentSong) {
+                            setState(() {
+                              selectedSong = MusicSettings.selectedSong;
+                            });
+                          });
                         },
                         trailingIcon: IconButton(
                           onPressed: () async {
-                            final isLiked = await LocalSavingDataModel()
+                            final isLiked = await localSavingDataModel
                                 .addLikedSong(selectedSong!);
                             if (isLiked) {
                               setState(() {

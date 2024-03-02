@@ -20,6 +20,11 @@ class MusicSettings {
   static bool isRepeat = false;
   static bool isLooped = false;
 
+
+  set setSelectedSong(SongModel? value) {
+    selectedSong = value;
+  }
+
   // Add your methods and properties here
   Future<List<SongModel>> fetchAudioFiles() async {
     try {
@@ -32,7 +37,4 @@ class MusicSettings {
     return songs;
   }
 
-  // Future<void> updateSelectedSongFromLocalStorage() async {
-  //   selectedSong = await LocalSavingDataModel().getCurrentPlayingSong();
-  // }
 }

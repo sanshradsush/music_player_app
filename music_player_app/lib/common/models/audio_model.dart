@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+
+import 'music_settings_model.dart';
+import 'shared_data_model.dart';
 
 class AudioPlayerModel extends ChangeNotifier {
   static final _audioPlayer = AudioPlayer();
@@ -18,6 +22,10 @@ class AudioPlayerModel extends ChangeNotifier {
 
   set currentSong(SongModel? value) {
     _currentSong = value;
+    LocalSavingDataModel().updateCurrentPlayingSong(value!);
+    MusicSettings.instance.setSelectedSong = value;
+    _currentPosition = 0.0;
+    playLocalMusic(value.data);
     notifyListeners();
   }
 
@@ -59,6 +67,7 @@ class AudioPlayerModel extends ChangeNotifier {
       await _audioPlayer.stop();
       await _audioPlayer.setFilePath(path ?? '');
       await _audioPlayer.play();
+      Logger().i('playing audio: ');
     } catch (e) {
       print('Error playing audio: $e');
     }
