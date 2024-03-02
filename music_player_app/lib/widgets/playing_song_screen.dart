@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -20,6 +21,9 @@ class PlayingSongScreen extends StatefulWidget {
   State<PlayingSongScreen> createState() => _PlayingSongScreenState();
 }
 
+bool ShuffleEnable = true;
+bool LoopEnable = true;
+
 class _PlayingSongScreenState extends State<PlayingSongScreen> {
   Future<Uint8List?> getArtwork(int songId) async {
     try {
@@ -38,6 +42,30 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
     int remainingSeconds = duration.inSeconds % 60;
 
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> enableDisableShuffle() async {
+    setState(() {
+      if (ShuffleEnable == true) {
+        ShuffleEnable = false;
+        LoopEnable = true;
+      } else {
+        ShuffleEnable = true;
+        LoopEnable = false;
+      }
+    });
+  }
+
+  Future<void> enableDisableLoop() async {
+    setState(() {
+      if (LoopEnable == true) {
+        LoopEnable = false;
+        ShuffleEnable = true;
+      } else {
+        LoopEnable = true;
+        ShuffleEnable = false;
+      }
+    });
   }
 
   @override
@@ -122,29 +150,94 @@ class _PlayingSongScreenState extends State<PlayingSongScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.skip_previous),
+                icon: ShuffleEnable
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 16.0),
+                        child: ImageIcon(
+                          AssetImage("assets/images/arrow.png"),
+                          color: Colors.black,
+                          size: 20,
+                        ),
+                      )
+                    : const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 16.0),
+                        child: ImageIcon(
+                          AssetImage("assets/images/arrow.png"),
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                      ),
+                onPressed: () async {
+                  await enableDisableShuffle();
+                },
+              ),
+              IconButton(
+                icon: const ImageIcon(
+                  AssetImage("assets/images/backward-track.png"),
+                  color: Colors.black,
+                  size: 24,
+                ),
                 onPressed: () {},
               ),
               Consumer<AudioPlayerModel>(
                 builder: (context, audioModel, child) {
                   return IconButton(
                     icon: audioModel.isPlaying
-                        ? const Icon(Icons.pause)
-                        : const Icon(Icons.play_arrow),
+                        ? const ImageIcon(
+                            AssetImage("assets/images/pause.png"),
+                            color: Colors.black,
+                            size: 44,
+                          )
+                        : const ImageIcon(
+                            AssetImage("assets/images/play-button.png"),
+                            color: Colors.black,
+                            size: 44,
+                          ),
                     onPressed: () async {
                       if (audioModel.currentPosition > 0.0) {
                         audioModel.togglePlayPause();
                       } else {
-                        await audioModel.playLocalMusic(widget.selectedSong?.data);
+                        await audioModel
+                            .playLocalMusic(widget.selectedSong?.data);
                       }
                     },
                   );
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.skip_next),
+                icon: const ImageIcon(
+                  AssetImage("assets/images/next.png"),
+                  color: Colors.black,
+                  size: 24,
+                ),
                 onPressed: () {
                   setState(() {});
+                },
+              ),
+              IconButton(
+                icon: LoopEnable
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 16.0),
+                        child: ImageIcon(
+                          AssetImage("assets/images/loop.png"),
+                          color: Colors.black,
+                          size: 20,
+                        ),
+                      )
+                    : const Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 16.0),
+                        child: ImageIcon(
+                          AssetImage("assets/images/loop.png"),
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                      ),
+                onPressed: () async {
+                  await enableDisableLoop();
                 },
               ),
             ],

@@ -9,6 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+
   cupertino_icons: ^1.0.6
   provider: ^6.1.1
   on_audio_query: ^2.9.0
@@ -25,3 +26,13 @@ dev_dependencies:
   flutter_lints: ^3.0.0
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/next.png
+    - assets/images/arrow.png
+    - assets/images/backward-track.png
+    - assets/images/loop.png
+    - assets/images/love.png
+    - assets/images/heart.png
+    - assets/images/pause.png
+    - assets/images/play-button.png
+    
