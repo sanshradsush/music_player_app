@@ -1,25 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:music_player_app/common/models/audio_model.dart';
+import 'package:logger/logger.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
+import 'common/models/audio_model.dart';
 import 'widgets/home_page.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  final logger = Logger();
+  WidgetsFlutterBinding.ensureInitialized();
+  var storageAccess = await Permission.audio.status.isGranted ||
+      await Permission.storage.status.isGranted;
+  logger.i('Storage access: $storageAccess');
+
+  runApp(MyApp(
+    storageAccess: storageAccess,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({
+    required this.storageAccess,
+    super.key,
+  });
+  final bool storageAccess;
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
     return MaterialApp(
-      title: 'Music Player',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      home: Scaffold(
+        key: scaffoldKey,
+        body: ChangeNotifierProvider(
+          create: (context) => AudioPlayerModel(),
+          child: HomePage(
+            storageAccess: storageAccess,
+          ),
+        ),
       ),
-      home: const HomePage(),
     );
   }
 }

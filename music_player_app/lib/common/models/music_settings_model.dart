@@ -1,0 +1,38 @@
+import 'package:logger/logger.dart';
+import 'package:on_audio_query/on_audio_query.dart';
+
+class MusicSettings {
+  // Private constructor
+  MusicSettings._();
+
+  // Singleton instance
+  static final MusicSettings _instance = MusicSettings._();
+
+  OnAudioQuery audioQuery = OnAudioQuery();
+  Logger logger = Logger();
+
+  // Getter to access the instance
+  static MusicSettings get instance => _instance;
+
+  static SongModel? selectedSong;
+  static List<SongModel> songs = [];
+  static bool isShuffle = false;
+  static bool isRepeat = false;
+  static bool isLooped = false;
+
+  // Add your methods and properties here
+  Future<List<SongModel>> fetchAudioFiles() async {
+    try {
+      songs = await audioQuery.querySongs();
+
+      logger.i('Audio files fetched successfully from the device');
+    } catch (e) {
+      logger.e('Error fetching audio files: $e');
+    }
+    return songs;
+  }
+
+  // Future<void> updateSelectedSongFromLocalStorage() async {
+  //   selectedSong = await LocalSavingDataModel().getCurrentPlayingSong();
+  // }
+}
