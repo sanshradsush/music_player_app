@@ -6,19 +6,18 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
 
 import '../common/models/audio_model.dart';
+import '../common/models/shared_data_model.dart';
 import '../common/widgets/selected_song_view.dart';
 
 class PlayingSongScreen extends StatefulWidget {
   const PlayingSongScreen({
     required this.selectedSong,
-    required this.playNext,
-    required this.playPrevious,
+    required this.songList,
     super.key,
   });
 
   final SongModel? selectedSong;
-  final VoidCallback playNext;
-  final VoidCallback playPrevious;
+  final List<SongModel> songList;
 
   @override
   State<PlayingSongScreen> createState() => _PlayingSongScreenState();
@@ -26,9 +25,16 @@ class PlayingSongScreen extends StatefulWidget {
 
 class _PlayingSongScreenState extends State<PlayingSongScreen>
     with SingleTickerProviderStateMixin {
+  Logger logger = Logger();
+  Future<Uint8List>? _artworkFuture;
   bool shuffleEnable = true;
   bool loopEnable = true;
   late TabController _tabController;
+  SongModel? selectedSong;
+
+  LocalSavingDataModel localSavingDataModel = LocalSavingDataModel();
+  AudioPlayerModel audioPlayerModel = AudioPlayerModel();
+
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
@@ -39,6 +45,8 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    selectedSong = widget.selectedSong;
+    getArtwork(selectedSong?.id ?? 0);
   }
 
   @override
@@ -51,11 +59,12 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
     try {
       final Uint8List? artwork = await OnAudioQuery()
           .queryArtwork(songId, ArtworkType.AUDIO, size: 200);
-      return artwork;
+      artwork != null ? _artworkFuture = Future.value(artwork) : null;
     } catch (e) {
       Logger().e('Error fetching artwork: $e');
-      return null;
     }
+    setState(() {});
+    return _artworkFuture;
   }
 
   String convertSecondsToMinutesAndSeconds(int seconds) {
@@ -66,7 +75,20 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  Future<void> enableDisableShuffle() async {
+  Future<void> playWithShuffle() async {
+    final shuffleSongs = List.from(widget.songList);
+    shuffleSongs.shuffle();
+    final selected = selectedSong != shuffleSongs.first
+        ? shuffleSongs.first
+        : shuffleSongs.last;
+    audioPlayerModel.currentSong = selected;
+    setState(() {
+      selectedSong = selected;
+      _artworkFuture = null;
+    });
+  }
+
+  void enableDisableShuffle() {
     setState(() {
       if (shuffleEnable == true) {
         shuffleEnable = false;
@@ -78,7 +100,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
     });
   }
 
-  Future<void> enableDisableLoop() async {
+  void enableDisableLoop() {
     setState(() {
       if (loopEnable == true) {
         loopEnable = false;
@@ -101,7 +123,6 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       body: ChangeNotifierProvider(
         create: (context) => AudioPlayerModel(),
@@ -143,14 +164,15 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                     Column(
                       children: [
                         SelectedSongView(
-                          title: widget.selectedSong?.title ?? 'Unknown',
-                          artist: widget.selectedSong?.artist ?? 'Unknown',
+                          title: selectedSong?.title ?? 'Unknown',
+                          artist: selectedSong?.artist ?? 'Unknown',
                           leadingIcon: const Icon(Icons.music_note),
                         ),
 
                         Expanded(
                           child: FutureBuilder(
-                            future: getArtwork(widget.selectedSong?.id ?? 0),
+                            future: _artworkFuture ??
+                                getArtwork(selectedSong?.id ?? 0),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                       ConnectionState.done &&
@@ -198,8 +220,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                           min: 0,
                                           max: Duration(
                                             milliseconds:
-                                                widget.selectedSong?.duration ??
-                                                    0,
+                                                selectedSong?.duration ?? 0,
                                           ).inSeconds.toDouble(),
                                           onChanged: (value) async {
                                             audioModel.currentPosition = value;
@@ -209,7 +230,8 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                       ),
                                       Text(
                                         convertSecondsToMinutesAndSeconds(
-                                            widget.selectedSong?.duration ?? 0),
+                                          selectedSong?.duration ?? 0,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -242,8 +264,8 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                         size: 20,
                                       ),
                                     ),
-                              onPressed: () async {
-                                await enableDisableShuffle();
+                              onPressed: () {
+                                enableDisableShuffle();
                               },
                             ),
                             IconButton(
@@ -252,7 +274,11 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                 color: Colors.black,
                                 size: 24,
                               ),
-                              onPressed: () {},
+                              onPressed: () {
+                                if (shuffleEnable) {
+                                  playWithShuffle();
+                                }
+                              },
                             ),
                             Consumer<AudioPlayerModel>(
                               builder: (context, audioModel, child) {
@@ -287,7 +313,9 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                 size: 24,
                               ),
                               onPressed: () {
-                                setState(() {});
+                                if (shuffleEnable) {
+                                  playWithShuffle();
+                                }
                               },
                             ),
                             IconButton(
@@ -310,8 +338,8 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                         size: 20,
                                       ),
                                     ),
-                              onPressed: () async {
-                                await enableDisableLoop();
+                              onPressed: () {
+                                enableDisableLoop();
                               },
                             ),
                           ],

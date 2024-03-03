@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 
 enum SideBar {
   allSongs,
-  likedSong;
+  likedSong,
+  playlist,
+  folder,
+  album,
+  artist;
 
   String getFieldName() {
     final key = switch (this) {
-      SideBar.allSongs => "All Songs",
+      SideBar.allSongs => "Songs",
       SideBar.likedSong => "Liked",
+      SideBar.playlist => "Playlist",
+      SideBar.folder => "Folders",
+      SideBar.album => "Albums",
+      SideBar.artist => "Artists",
     };
 
     return key;
@@ -17,6 +25,7 @@ enum SideBar {
     final icon = switch (this) {
       SideBar.allSongs => const Icon(Icons.music_note),
       SideBar.likedSong => const Icon(Icons.heart_broken),
+      _ => const Icon(Icons.folder),
     };
 
     return icon;
