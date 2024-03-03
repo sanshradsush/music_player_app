@@ -43,6 +43,8 @@ class _SongListScreenState extends State<SongListScreen> {
     updateSelectedSongFromLocalStorage();
   }
 
+  
+
   Future<Uint8List?> getArtwork(int songId) async {
     try {
       final Uint8List? artwork =
@@ -59,6 +61,8 @@ class _SongListScreenState extends State<SongListScreen> {
     final song = await localSavingDataModel.getCurrentPlayingSong();
     if (song != null) {
       final isLiked = await localSavingDataModel.checkForLikedSong(song);
+      logger
+          .d('Updating selected song from local storage --> $song \n $isLiked');
       setState(() {
         selectedSong = song;
         selectedSongLiked = isLiked;
@@ -77,9 +81,10 @@ class _SongListScreenState extends State<SongListScreen> {
               artist: songList[index].artist ?? 'Unknown',
               onTap: () async {
                 audioPlayerModel.currentSong = songList[index];
-                setState(() {
-                  selectedSong = songList[index];
-                });
+                selectedSongLiked = await localSavingDataModel
+                    .checkForLikedSong(songList[index]);
+                selectedSong = songList[index];
+                setState(() {});
               },
               leadingIcon: FutureBuilder(
                 future: getArtwork(songList[index].id),
