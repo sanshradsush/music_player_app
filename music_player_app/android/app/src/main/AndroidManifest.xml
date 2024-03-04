@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <application
         android:requestLegacyExternalStorage="true" 
-        android:label="music_player_app"
+        android:label="Sound Spin"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
