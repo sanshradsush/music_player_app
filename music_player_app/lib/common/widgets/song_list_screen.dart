@@ -15,12 +15,12 @@ import 'song_list_view.dart';
 class SongListScreen extends StatefulWidget {
   const SongListScreen({
     required this.selectedSong,
-    required this.songs,
+    this.likedTab = false,
     super.key,
   });
 
   final SongModel? selectedSong;
-  final List<SongModel> songs;
+  final bool likedTab;
 
   @override
   State<SongListScreen> createState() => _SongListScreenState();
@@ -39,11 +39,25 @@ class _SongListScreenState extends State<SongListScreen> {
   void initState() {
     super.initState();
     selectedSong = widget.selectedSong;
-    songList = widget.songs;
+    // songList = widget.songs;
+    fetchSongs();
     updateSelectedSongFromLocalStorage();
   }
 
-  
+  Future<void> fetchSongs() async {
+    if (widget.likedTab) {
+      final List<SongModel> likedSongs =
+          await localSavingDataModel.getLikedSongs();
+      setState(() {
+        songList = likedSongs;
+      });
+    } else {
+      final List<SongModel> songs = await audioQuery.querySongs();
+      setState(() {
+        songList = songs;
+      });
+    }
+  }
 
   Future<Uint8List?> getArtwork(int songId) async {
     try {
@@ -179,7 +193,7 @@ class _SongListScreenState extends State<SongListScreen> {
                           : const Icon(Icons.favorite_border),
                     ),
                     leadingIcon: FutureBuilder(
-                      future: getArtwork(widget.selectedSong?.id ?? 0),
+                      future: getArtwork(selectedSong?.id ?? 0),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.done &&
                             snapshot.data != null) {

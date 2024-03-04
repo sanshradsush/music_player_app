@@ -47,12 +47,11 @@ class _HomePageState extends State<HomePage>
 
   late final songListScreeen = SongListScreen(
     selectedSong: selectedSong,
-    songs: songs,
   );
 
   late final likedSongsScreen = SongListScreen(
     selectedSong: selectedSong,
-    songs: songs,
+    likedTab: true,
   );
 
   @override
@@ -76,6 +75,7 @@ class _HomePageState extends State<HomePage>
                   songs = await MusicSettings.instance.fetchAudioFiles();
                 } else if (index == 1) {
                   songs = await localSavingDataModel.getLikedSongs();
+                  logger.e('Liked songs: $songs');
                 }
 
                 setState(() {});
