@@ -28,7 +28,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
   Logger logger = Logger();
   Future<Uint8List>? _artworkFuture;
   bool shuffleEnable = true;
-  bool loopEnable = true;
+  bool loopEnable = false;
   late TabController _tabController;
   SongModel? selectedSong;
 
@@ -47,6 +47,13 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
     _tabController = TabController(length: 2, vsync: this);
     selectedSong = widget.selectedSong;
     getArtwork(selectedSong?.id ?? 0);
+    updateShuffleAndLoop();
+  }
+
+  void updateShuffleAndLoop() async {
+    shuffleEnable = await localSavingDataModel.getShuffle();
+    loopEnable = await localSavingDataModel.getPlayRepeat();
+    setState(() {});
   }
 
   @override
@@ -88,28 +95,12 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
     });
   }
 
-  void enableDisableShuffle() {
-    setState(() {
-      if (shuffleEnable == true) {
-        shuffleEnable = false;
-        loopEnable = true;
-      } else {
-        shuffleEnable = true;
-        loopEnable = false;
-      }
-    });
-  }
-
-  void enableDisableLoop() {
-    setState(() {
-      if (loopEnable == true) {
-        loopEnable = false;
-        shuffleEnable = true;
-      } else {
-        loopEnable = true;
-        shuffleEnable = false;
-      }
-    });
+  void enableDisableShuffleLoopButtons() {
+    shuffleEnable = !shuffleEnable;
+    loopEnable = !shuffleEnable;
+    localSavingDataModel.updatePlayShuffle(shuffleEnable);
+    localSavingDataModel.updatePlayRepeat(loopEnable);
+    setState(() {});
   }
 
   Widget _buildCustomTab(String text) {
@@ -265,7 +256,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                       ),
                                     ),
                               onPressed: () {
-                                enableDisableShuffle();
+                                enableDisableShuffleLoopButtons();
                               },
                             ),
                             IconButton(
@@ -339,7 +330,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                       ),
                                     ),
                               onPressed: () {
-                                enableDisableLoop();
+                                enableDisableShuffleLoopButtons();
                               },
                             ),
                           ],
