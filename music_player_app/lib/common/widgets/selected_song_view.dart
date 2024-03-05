@@ -19,7 +19,9 @@ class SelectedSongView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(title),
+      title: Text(title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,),
       subtitle: Text(artist),
       leading: leadingIcon ?? const Icon(Icons.music_note),
       trailing: trailingIcon,
