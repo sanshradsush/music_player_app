@@ -19,7 +19,7 @@ class LocalSavingDataModel {
 
   Future<bool> getShuffle() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(isShuffle) ?? false;
+    return prefs.getBool(isShuffle) ?? true;
   }
 
   Future<bool> updatePlayRepeat(bool value) async {
