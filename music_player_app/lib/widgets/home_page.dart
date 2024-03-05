@@ -61,25 +61,15 @@ class _HomePageState extends State<HomePage>
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: const Text('Music Player'),
           bottom: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabs: [
-                for (SideBar item in SideBar.values)
-                  Tab(
-                    text: item.getFieldName(),
-                  )
-              ],
-              onTap: (index) async {
-                logger.i('Tab index: $index');
-                if (index == 0) {
-                  songs = await MusicSettings.instance.fetchAudioFiles();
-                } else if (index == 1) {
-                  songs = await localSavingDataModel.getLikedSongs();
-                  logger.e('Liked songs: $songs');
-                }
-
-                setState(() {});
-              }),
+            controller: _tabController,
+            isScrollable: true,
+            tabs: [
+              for (SideBar item in SideBar.values)
+                Tab(
+                  text: item.getFieldName(),
+                )
+            ],
+          ),
         ),
         body: TabBarView(
           controller: _tabController,

@@ -4,10 +4,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalSavingDataModel {
   static const selectedSong = 'selected_song';
   static const likedSongs = 'liked_songs';
+  static const isShuffle = 'is_shuffle';
+  static const isRepeat = 'is_repeat';
 
   Future<bool> updateCurrentPlayingSong(SongModel song) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.setInt(selectedSong, song.id);
+  }
+
+  Future<bool> updatePlayShuffle(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(isShuffle, value);
+  }
+
+  Future<bool> getShuffle() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(isShuffle) ?? false;
+  }
+
+  Future<bool> updatePlayRepeat(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(isRepeat, value);
+  }
+
+  Future<bool> getPlayRepeat() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(isRepeat) ?? false;
   }
 
   Future<SongModel?> getCurrentPlayingSong() async {
