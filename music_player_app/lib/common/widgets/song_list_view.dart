@@ -16,11 +16,23 @@ class SongListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(artist),
-      leading: leadingIcon,
-      onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.secondary,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        title: Text(title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,),
+        subtitle: Text(artist),
+        leading: leadingIcon,
+        onTap: onTap,
+      ),
     );
   }
 }
