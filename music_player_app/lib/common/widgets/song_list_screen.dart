@@ -242,7 +242,7 @@ class _SongListScreenState extends State<SongListScreen> {
               ),
             ),
           ),
-      ],git
+      ],
     );
   }
 }
