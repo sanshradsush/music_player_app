@@ -6,6 +6,7 @@ class LocalSavingDataModel {
   static const likedSongs = 'liked_songs';
   static const isShuffle = 'is_shuffle';
   static const isRepeat = 'is_repeat';
+  static const playList = 'play_list';
 
   Future<bool> updateCurrentPlayingSong(SongModel song) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -71,5 +72,22 @@ class LocalSavingDataModel {
   Future<bool> checkForLikedSong(SongModel song) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return (prefs.getStringList(likedSongs) ?? []).contains(song.id.toString());
+  }
+
+  // Create new play list
+  Future<bool> createNewPlayList(String playListName) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String> playLists = (prefs.getStringList(playList) ?? []);
+    if (playLists.contains(playListName)) {
+      return false;
+    }
+    playLists.add(playListName);
+    return prefs.setStringList(playList, playLists);
+  }
+
+  // Get all play lists
+  Future<List<String>> getPlayLists() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(playList) ?? [];
   }
 }
