@@ -1,7 +1,6 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -12,33 +11,28 @@ import 'widgets/home_page.dart';
 
 void main() async {
   final logger = Logger();
-  List<SongModel> songList = [];
   WidgetsFlutterBinding.ensureInitialized();
   var storageAccess = await Permission.audio.status.isGranted ||
       await Permission.storage.status.isGranted;
   logger.i('Storage access: $storageAccess');
 
   if (storageAccess) {
-    songList = await MusicSettings.instance.fetchAudioFiles();
     MusicSettings.instance.setSelectedSong =
         await LocalSavingDataModel().getCurrentPlayingSong();
   }
 
   runApp(MyApp(
     storageAccess: storageAccess,
-    songList: songList,
   ));
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({
     required this.storageAccess,
-    required this.songList,
     super.key,
   });
 
   final bool storageAccess;
-  final List<SongModel> songList;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -46,13 +40,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Logger logger = Logger();
-  List<SongModel> songs = [];
   bool storageAccess = false;
 
   @override
   void initState() {
     super.initState();
-    songs = widget.songList;
     storageAccess = widget.storageAccess;
   }
 
@@ -70,7 +62,6 @@ class _MyAppState extends State<MyApp> {
     if (statuses[Permission.audio] == PermissionStatus.granted ||
         statuses[Permission.storage] == PermissionStatus.granted) {
       logger.d('Storage permission granted');
-      songs = await MusicSettings.instance.fetchAudioFiles();
       storageAccess = true;
       setState(() {});
     } else {
@@ -85,13 +76,12 @@ class _MyAppState extends State<MyApp> {
     return storageAccess
         ? MaterialApp(
             home: Scaffold(
-                key: scaffoldKey,
-                body: ChangeNotifierProvider(
-                  create: (context) => AudioPlayerModel(),
-                  child: HomePage(
-                    songList: songs,
-                  ),
-                )),
+              key: scaffoldKey,
+              body: ChangeNotifierProvider(
+                create: (context) => AudioPlayerModel(),
+                child: const HomePage(),
+              ),
+            ),
           )
         : MaterialApp(
             home: Scaffold(

@@ -47,7 +47,6 @@ class AudioPlayerModel extends ChangeNotifier {
       _currentPosition = position.inSeconds.toDouble();
       if (_disposed == false) notifyListeners();
     });
-    
   }
 
   void togglePlayPause() {
@@ -69,7 +68,7 @@ class AudioPlayerModel extends ChangeNotifier {
       await _audioPlayer.play();
       Logger().i('playing audio: ');
     } catch (e) {
-      print('Error playing audio: $e');
+      Logger().e('Error playing audio: $e');
     }
   }
 

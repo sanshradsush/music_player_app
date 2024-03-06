@@ -14,12 +14,10 @@ import 'song_list_view.dart';
 
 class SongListScreen extends StatefulWidget {
   const SongListScreen({
-    required this.selectedSong,
     this.likedTab = false,
     super.key,
   });
 
-  final SongModel? selectedSong;
   final bool likedTab;
 
   @override
@@ -38,8 +36,6 @@ class _SongListScreenState extends State<SongListScreen> {
   @override
   void initState() {
     super.initState();
-    selectedSong = widget.selectedSong;
-    // songList = widget.songs;
     fetchSongs();
     updateSelectedSongFromLocalStorage();
   }
@@ -88,7 +84,7 @@ class _SongListScreenState extends State<SongListScreen> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        ListView.separated(
+        ListView.builder(
           itemBuilder: (BuildContext context, int index) {
             return SongListView(
               title: songList[index].title,
@@ -115,11 +111,6 @@ class _SongListScreenState extends State<SongListScreen> {
               ),
             );
           },
-          separatorBuilder: (BuildContext context, int index) =>
-          const Divider(
-            thickness: 0.1,
-            color: Colors.grey,
-          ),
           itemCount: songList.length,
         ),
         if (selectedSong != null)
@@ -130,10 +121,7 @@ class _SongListScreenState extends State<SongListScreen> {
             child: Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .inversePrimary,
+                color: Colors.white,
                 border: Border.all(
                   color: Colors.grey,
                 ),
@@ -162,8 +150,8 @@ class _SongListScreenState extends State<SongListScreen> {
                             );
                           },
                         ).then((currentSong) {
-                          logger.d(
-                              'Current song: ${MusicSettings.selectedSong}');
+                          logger
+                              .d('Current song: ${MusicSettings.selectedSong}');
                           setState(() {
                             selectedSong = MusicSettings.selectedSong;
                           });
@@ -197,9 +185,9 @@ class _SongListScreenState extends State<SongListScreen> {
                             },
                             icon: selectedSongLiked
                                 ? const Icon(
-                              Icons.favorite,
-                              color: Colors.green,
-                            )
+                                    Icons.favorite,
+                                    color: Colors.green,
+                                  )
                                 : const Icon(Icons.favorite_border),
                           ),
                           IconButton(
@@ -213,8 +201,8 @@ class _SongListScreenState extends State<SongListScreen> {
                             },
                             icon: audioModel.isPlaying
                                 ? const Icon(
-                              Icons.pause,
-                            )
+                                    Icons.pause,
+                                  )
                                 : const Icon(Icons.play_arrow_sharp),
                           ),
                         ],
@@ -223,11 +211,11 @@ class _SongListScreenState extends State<SongListScreen> {
                         future: getArtwork(selectedSong?.id ?? 0),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
-                              ConnectionState.done &&
+                                  ConnectionState.done &&
                               snapshot.data != null) {
                             return CircleAvatar(
                               backgroundImage:
-                              MemoryImage(snapshot.data as Uint8List),
+                                  MemoryImage(snapshot.data as Uint8List),
                             );
                           } else {
                             return const CircleAvatar(
