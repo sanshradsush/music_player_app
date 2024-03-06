@@ -115,7 +115,8 @@ class _SongListScreenState extends State<SongListScreen> {
               ),
             );
           },
-          separatorBuilder: (BuildContext context, int index) => const Divider(
+          separatorBuilder: (BuildContext context, int index) =>
+          const Divider(
             thickness: 0.1,
             color: Colors.grey,
           ),
@@ -129,7 +130,10 @@ class _SongListScreenState extends State<SongListScreen> {
             child: Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme
+                    .of(context)
+                    .colorScheme
+                    .inversePrimary,
                 border: Border.all(
                   color: Colors.grey,
                 ),
@@ -141,75 +145,100 @@ class _SongListScreenState extends State<SongListScreen> {
                   ),
                 ],
               ),
-              child: Consumer<AudioPlayerModel>(
-                builder: (context, audioModel, child) {
-                  return SelectedSongView(
-                    artist: selectedSong?.artist ?? 'Unknown',
-                    title: selectedSong?.title ?? 'Unknown',
-                    onTap: () {
-                      showModalBottomSheet<SongModel>(
-                        isScrollControlled: true,
-                        context: context,
-                        builder: (context) {
-                          return PlayingSongScreen(
-                            selectedSong: selectedSong,
-                            songList: songList,
-                          );
-                        },
-                      ).then((currentSong) {
-                        logger.d('Current song: ${MusicSettings.selectedSong}');
-                        setState(() {
-                          selectedSong = MusicSettings.selectedSong;
+              child: Center(
+                child: Consumer<AudioPlayerModel>(
+                  builder: (context, audioModel, child) {
+                    return SelectedSongView(
+                      artist: selectedSong?.artist ?? 'Unknown',
+                      title: selectedSong?.title ?? 'Unknown',
+                      onTap: () {
+                        showModalBottomSheet<SongModel>(
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) {
+                            return PlayingSongScreen(
+                              selectedSong: selectedSong,
+                              songList: songList,
+                            );
+                          },
+                        ).then((currentSong) {
+                          logger.d(
+                              'Current song: ${MusicSettings.selectedSong}');
+                          setState(() {
+                            selectedSong = MusicSettings.selectedSong;
+                          });
                         });
-                      });
-                    },
-                    trailingIcon: IconButton(
-                      onPressed: () async {
-                        if (selectedSongLiked) {
-                          final isUnliked = await localSavingDataModel
-                              .removeLikedSong(selectedSong!);
-                          if (isUnliked) {
-                            setState(() {
-                              selectedSongLiked = false;
-                              songList.remove(selectedSong!);
-                            });
-                          }
-                        } else {
-                          final isLiked = await localSavingDataModel
-                              .addLikedSong(selectedSong!);
-                          if (isLiked) {
-                            setState(() {
-                              selectedSongLiked = true;
-                              songList.add(selectedSong!);
-                            });
-                          }
-                        }
                       },
-                      icon: selectedSongLiked
-                          ? const Icon(
+                      trailingIcon: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              if (selectedSongLiked) {
+                                final isUnliked = await localSavingDataModel
+                                    .removeLikedSong(selectedSong!);
+                                if (isUnliked) {
+                                  setState(() {
+                                    selectedSongLiked = false;
+                                    songList.remove(selectedSong!);
+                                  });
+                                }
+                              } else {
+                                final isLiked = await localSavingDataModel
+                                    .addLikedSong(selectedSong!);
+                                if (isLiked) {
+                                  setState(() {
+                                    selectedSongLiked = true;
+                                    songList.add(selectedSong!);
+                                  });
+                                }
+                              }
+                            },
+                            icon: selectedSongLiked
+                                ? const Icon(
                               Icons.favorite,
                               color: Colors.green,
                             )
-                          : const Icon(Icons.favorite_border),
-                    ),
-                    leadingIcon: FutureBuilder(
-                      future: getArtwork(selectedSong?.id ?? 0),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            snapshot.data != null) {
-                          return CircleAvatar(
-                            backgroundImage:
-                                MemoryImage(snapshot.data as Uint8List),
-                          );
-                        } else {
-                          return const CircleAvatar(
-                            backgroundColor: Colors.grey,
-                          );
-                        }
-                      },
-                    ),
-                  );
-                },
+                                : const Icon(Icons.favorite_border),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              if (audioModel.currentPosition > 0.0) {
+                                audioModel.togglePlayPause();
+                              } else {
+                                await audioModel
+                                    .playLocalMusic(selectedSong?.data);
+                              }
+                            },
+                            icon: audioModel.isPlaying
+                                ? const Icon(
+                              Icons.pause,
+                            )
+                                : const Icon(Icons.play_arrow_sharp),
+                          ),
+                        ],
+                      ),
+                      leadingIcon: FutureBuilder(
+                        future: getArtwork(selectedSong?.id ?? 0),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done &&
+                              snapshot.data != null) {
+                            return CircleAvatar(
+                              backgroundImage:
+                              MemoryImage(snapshot.data as Uint8List),
+                            );
+                          } else {
+                            return const CircleAvatar(
+                              backgroundColor: Colors.grey,
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),
