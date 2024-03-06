@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 
 import '../common/models/shared_data_model.dart';
 import '../common/models/side_bar_model.dart';
+import '../common/widgets/playlist_screen.dart';
 import '../common/widgets/song_list_screen.dart';
 
 class HomePage extends StatefulWidget {
@@ -38,41 +39,43 @@ class _HomePageState extends State<HomePage>
     likedTab: true,
   );
 
+  late final playListScreen = const PlayListScreen();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const Text('Music Player'),
-          bottom: TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabs: [
-              for (SideBar item in SideBar.values)
-                Tab(
-                  text: item.getFieldName(),
-                )
-            ],
-          ),
-        ),
-        body: TabBarView(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Music Player'),
+        bottom: TabBar(
           controller: _tabController,
-          children: [
-            songListScreeen,
-            likedSongsScreen,
-            const Center(
-              child: Text('Artists'),
-            ),
-            const Center(
-              child: Text('Albums'),
-            ),
-            const Center(
-              child: Text('Playlists'),
-            ),
-            const Center(
-              child: Text('none'),
-            ),
+          indicatorPadding: EdgeInsets.zero, 
+          isScrollable: true,
+          tabs: [
+            for (SideBar item in SideBar.values)
+              Tab(
+                text: item.getFieldName(),
+              )
           ],
-        ));
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          songListScreeen,
+          likedSongsScreen,
+          playListScreen,
+          const Center(
+            child: Text('Albums'),
+          ),
+          const Center(
+            child: Text('Playlists'),
+          ),
+          const Center(
+            child: Text('none'),
+          ),
+        ],
+      ),
+    );
   }
 }
