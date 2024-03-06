@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 
-import '../common/models/audio_model.dart';
-import '../common/models/music_settings_model.dart';
 import '../common/models/shared_data_model.dart';
 import '../common/models/side_bar_model.dart';
 import '../common/widgets/song_list_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
-    required this.songList,
     super.key,
   });
-
-  final List<SongModel> songList;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -22,20 +16,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  final OnAudioQuery audioQuery = OnAudioQuery();
   LocalSavingDataModel localSavingDataModel = LocalSavingDataModel();
-  AudioPlayerModel audioPlayerModel = AudioPlayerModel();
   Logger logger = Logger();
-  List<SongModel> songs = [];
-  SongModel? selectedSong;
-  bool selectedSongLiked = false;
-  bool tapOnSelectedSong = false;
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    songs = widget.songList;
     _tabController = TabController(length: SideBar.values.length, vsync: this);
   }
 
@@ -45,12 +32,9 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  late final songListScreeen = SongListScreen(
-    selectedSong: selectedSong,
-  );
+  late final songListScreeen = const SongListScreen();
 
-  late final likedSongsScreen = SongListScreen(
-    selectedSong: selectedSong,
+  late final likedSongsScreen = const SongListScreen(
     likedTab: true,
   );
 
