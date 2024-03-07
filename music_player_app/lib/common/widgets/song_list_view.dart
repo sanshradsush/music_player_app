@@ -19,13 +19,6 @@ class SongListView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListTile(
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.secondary,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(10),
-        ),
         title: Text(title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,),

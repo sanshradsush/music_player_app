@@ -44,6 +44,7 @@ class _SongListScreenState extends State<SongListScreen> {
     if (widget.likedTab) {
       final List<SongModel> likedSongs =
           await localSavingDataModel.getLikedSongs();
+
       setState(() {
         songList = likedSongs;
       });
@@ -94,6 +95,7 @@ class _SongListScreenState extends State<SongListScreen> {
                 selectedSongLiked = await localSavingDataModel
                     .checkForLikedSong(songList[index]);
                 selectedSong = songList[index];
+                logger.d('Selected song: $selectedSong');
                 setState(() {});
               },
               leadingIcon: FutureBuilder(
@@ -121,7 +123,9 @@ class _SongListScreenState extends State<SongListScreen> {
             child: Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20)),
                 color: Colors.white,
                 border: Border.all(
                   color: Colors.grey,
@@ -168,19 +172,15 @@ class _SongListScreenState extends State<SongListScreen> {
                                 final isUnliked = await localSavingDataModel
                                     .removeLikedSong(selectedSong!);
                                 if (isUnliked) {
-                                  setState(() {
-                                    selectedSongLiked = false;
-                                    songList.remove(selectedSong!);
-                                  });
+                                  selectedSongLiked = false;
+                                  await fetchSongs();
                                 }
                               } else {
                                 final isLiked = await localSavingDataModel
                                     .addLikedSong(selectedSong!);
                                 if (isLiked) {
-                                  setState(() {
-                                    selectedSongLiked = true;
-                                    songList.add(selectedSong!);
-                                  });
+                                  selectedSongLiked = true;
+                                  await fetchSongs();
                                 }
                               }
                             },
