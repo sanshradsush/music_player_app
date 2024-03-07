@@ -121,6 +121,7 @@ class _SongListScreenState extends State<SongListScreen> {
             child: Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
                 color: Colors.white,
                 border: Border.all(
                   color: Colors.grey,

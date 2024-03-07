@@ -194,7 +194,7 @@ class LocalSavingDataModel {
   
   ******************************************************
 
-  Remove songId1 to playListName2:
+  Remove songId1 from playListName2:
 
   {
    "playListName1": ["songId1", "songId2", "songId3", "songId4"]
