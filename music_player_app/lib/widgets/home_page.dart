@@ -3,6 +3,8 @@ import 'package:logger/logger.dart';
 
 import '../common/models/shared_data_model.dart';
 import '../common/models/side_bar_model.dart';
+import '../common/widgets/album_screen.dart';
+import '../common/widgets/artists_screen.dart';
 import '../common/widgets/playlist_screen.dart';
 import '../common/widgets/song_list_screen.dart';
 
@@ -41,6 +43,9 @@ class _HomePageState extends State<HomePage>
 
   late final playListScreen = const PlayListScreen();
 
+  late final artistsScreen = const ArtistsScreen();
+  late final albumScreen = const AlbumScreen();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +54,7 @@ class _HomePageState extends State<HomePage>
         title: const Text('Music Player'),
         bottom: TabBar(
           controller: _tabController,
-          indicatorPadding: EdgeInsets.zero, 
+          indicatorPadding: EdgeInsets.zero,
           isScrollable: true,
           tabs: [
             for (SideBar item in SideBar.values)
@@ -66,14 +71,10 @@ class _HomePageState extends State<HomePage>
           likedSongsScreen,
           playListScreen,
           const Center(
-            child: Text('Albums'),
+            child: Text('Folders'),
           ),
-          const Center(
-            child: Text('Playlists'),
-          ),
-          const Center(
-            child: Text('none'),
-          ),
+          albumScreen,
+          artistsScreen
         ],
       ),
     );
