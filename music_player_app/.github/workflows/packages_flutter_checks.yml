@@ -1,0 +1,73 @@
+name: Flutter Checks - Packages
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  find-packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    name: Find Packages
+    outputs:
+      packages: ${{ steps.list.outputs.dirs }}
+    steps:
+      - uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - uses: actions/checkout@v3
+      - uses: DanTup/gh-actions/setup-dart@master
+      - run: dart pub get
+      - run: git fetch origin $GITHUB_BASE_REF
+      - name: List Packages
+        id: list
+        run: echo "dirs=$(dart run izakaya pub diff-matrix --paths --no-update --base-ref origin/$GITHUB_BASE_REF)" >> $GITHUB_OUTPUT
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: find-packages
+    if: toJson(needs.find-packages.outputs.packages) != toJson('[]')
+    strategy:
+      matrix:
+        folder: ${{ fromJson(needs.find-packages.outputs.packages) }}
+    steps:
+      - uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - uses: actions/checkout@v3
+      - uses: kuhnroyal/flutter-fvm-config-action@v2
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+      - run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+      - run: dart pub global activate fvm
+      - run: fvm config --cache-path /opt/hostedtoolcache/flutter
+      - run: fvm install -s
+      - run: make integrate
+        working-directory: ${{ matrix.folder }}
+      - name: Report Status
+        if: always() && github.ref_name == 'develop'
+        uses: ravsamhq/notify-slack-action@v1
+        with:
+          status: ${{ job.status }}
+          notify_when: "failure"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CHANNEL_URL }}
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs:
+      - analyze
+      - find-packages
+    if: toJson(needs.find-packages.outputs.packages) != toJson('[]')
+    steps:
+      - name: Passed
+        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        run: exit 0
+      - name: Failed
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: exit 1
