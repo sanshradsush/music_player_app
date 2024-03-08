@@ -20,7 +20,6 @@ class MusicSettings {
   static bool isRepeat = false;
   static bool isLooped = false;
 
-
   set setSelectedSong(SongModel? value) {
     selectedSong = value;
   }
@@ -30,7 +29,7 @@ class MusicSettings {
     try {
       songs = await audioQuery.querySongs();
 
-      logger.i('Audio files fetched successfully from the device');
+      logger.i('Audio files fetched successfully from the device $songs');
     } catch (e) {
       logger.e('Error fetching audio files: $e');
     }
@@ -104,7 +103,8 @@ class MusicSettings {
     return true;
   }
 
-  Future<bool> addSongsToPlaylist(int playlistId, List<SongModel> songList) async {
+  Future<bool> addSongsToPlaylist(
+      int playlistId, List<SongModel> songList) async {
     try {
       for (SongModel song in songList) {
         await audioQuery.addToPlaylist(playlistId, song.id);
@@ -144,12 +144,11 @@ class MusicSettings {
     final fetchAllSongs = await fetchAudioFiles();
     final playListSongs = await fetchSongsFromPlayList(playListId);
 
-      List<SongModel> filteredSongsList = fetchAllSongs
-          .where((song) => !playListSongs.any((playlistSong) => song.id == playlistSong.id))
-          .toList();
+    List<SongModel> filteredSongsList = fetchAllSongs
+        .where((song) => !playListSongs.any(
+            (playlistSong) => song.title.trim() == playlistSong.title.trim()))
+        .toList();
 
-    logger.i('filtered Songs List $filteredSongsList');
     return filteredSongsList;
   }
-
 }

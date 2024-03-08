@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:sound_spin/widgets/view_playlist.dart';
 import '../models/music_settings_model.dart';
@@ -7,7 +6,9 @@ import 'create_new_play_list_drawer.dart';
 import '../models/shared_data_model.dart';
 
 class PlayListScreen extends StatefulWidget {
-  const PlayListScreen({Key? key});
+  const PlayListScreen({
+    super.key,
+  });
 
   @override
   State<PlayListScreen> createState() => _PlayListScreenState();
@@ -17,21 +18,12 @@ class _PlayListScreenState extends State<PlayListScreen> {
   MusicSettings musicSettings = MusicSettings.instance;
   List<PlaylistModel> playlists = [];
   LocalSavingDataModel localDataModel = LocalSavingDataModel();
-  List<SongModel> allSongsList = [];
   OnAudioQuery audioQuery = OnAudioQuery();
 
   @override
   void initState() {
     super.initState();
-    fetchSongs();
     fetchPlaylists(); // Fetch playlists when the screen initializes
-  }
-
-  Future<void> fetchSongs() async {
-    final List<SongModel> songs = await audioQuery.querySongs();
-    setState(() {
-      allSongsList = songs;
-    });
   }
 
   // Method to fetch playlists
@@ -62,27 +54,22 @@ class _PlayListScreenState extends State<PlayListScreen> {
                       showModalBottomSheet(
                         context: context,
                         builder: (context) {
-                          return CreatePlayListDrawer();
+                          return const CreatePlayListDrawer();
                         },
                       ).then((_) async {
                         await fetchPlaylists();
-
                       });
                     },
                   ),
                   IconButton(
                     icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                      setState(() {
-                        // count--;
-                      });
-                    },
+                    onPressed: () {},
                   ),
                 ],
               )
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Expanded(
             child: ListView.builder(
               itemCount: playlists.length,
@@ -90,18 +77,13 @@ class _PlayListScreenState extends State<PlayListScreen> {
                 return ListTile(
                   title: Text(playlists[index].playlist),
                   onTap: () async {
-                    // List<SongModel> songs =
-                    //    await musicSettings.fetchSongsFromPlayList(playlists[index].playlist);
-                    showModalBottomSheet(
-                      isScrollControlled: true,
-                      context: context,
-                      builder: (context) {
-                        return ViewPlaylist(
-                            selectedPlayList: playlists[index]);
-                      },
-                    ).then((currentSong) {
-                      setState(() {});
-                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ViewPlaylist(selectedPlayList: playlists[index]),
+                      ),
+                    );
                   },
                   // Add functionality for each playlist item if needed
                 );

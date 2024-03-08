@@ -4,10 +4,12 @@ import '../models/music_settings_model.dart';
 import '../models/shared_data_model.dart';
 
 class CreatePlayListDrawer extends StatefulWidget {
-  const CreatePlayListDrawer({Key? key}) : super(key: key);
+  const CreatePlayListDrawer({
+    super.key,
+  });
 
   @override
-  _CreatePlayListDrawerState createState() => _CreatePlayListDrawerState();
+  State createState() => _CreatePlayListDrawerState();
 }
 
 class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
@@ -45,7 +47,7 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
             child: Center(
               child: Text(
                 'Create New Playlist',
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
           ),
@@ -53,7 +55,7 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
             padding: const EdgeInsets.all(20.0),
             child: TextField(
               controller: _playlistNameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Playlist Name',
               ),
@@ -67,9 +69,10 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
                 ),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -79,16 +82,17 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
                     Navigator.of(context).pop();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Please enter a playlist name'),
                       ),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
                 ),
-                child: Text('Create'),
+                child: const Text('Create'),
               ),
             ],
           ),
