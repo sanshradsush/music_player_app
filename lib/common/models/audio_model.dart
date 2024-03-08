@@ -77,4 +77,5 @@ class AudioPlayerModel extends ChangeNotifier {
     _disposed = true;
     super.dispose();
   }
+  
 }
