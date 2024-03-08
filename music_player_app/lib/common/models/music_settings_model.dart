@@ -72,7 +72,7 @@ class MusicSettings {
     return playlists;
   }
 
-  Future<bool> createPlaylist(String playlistName) async {
+  Future<bool> createPlaylist({required String playlistName}) async {
     try {
       final playlist = await fetchPlaylists();
 
@@ -92,7 +92,7 @@ class MusicSettings {
     return true;
   }
 
-  Future<bool> deletePlaylist(int playlistId) async {
+  Future<bool> deletePlaylist({required int playlistId}) async {
     try {
       await audioQuery.removePlaylist(playlistId);
       logger.i('Playlist deleted successfully');
@@ -103,8 +103,10 @@ class MusicSettings {
     return true;
   }
 
-  Future<bool> addSongsToPlaylist(
-      int playlistId, List<SongModel> songList) async {
+  Future<bool> addSongsToPlaylist({
+    required int playlistId,
+    required List<SongModel> songList,
+  }) async {
     try {
       for (SongModel song in songList) {
         await audioQuery.addToPlaylist(playlistId, song.id);
@@ -117,7 +119,8 @@ class MusicSettings {
     return true;
   }
 
-  Future<bool> removeFromPlaylist(int playlistId, int songId) async {
+  Future<bool> removeFromPlaylist(
+      {required playlistId, required int songId}) async {
     try {
       await audioQuery.removeFromPlaylist(playlistId, songId);
       logger.i('Song removed from playlist successfully');
@@ -128,10 +131,11 @@ class MusicSettings {
     return true;
   }
 
-  Future<List<SongModel>> fetchSongsFromPlayList(int id) async {
+  Future<List<SongModel>> fetchSongsFromPlayList({required playlistId}) async {
     List<SongModel> songsList = [];
     try {
-      songsList = await audioQuery.queryAudiosFrom(AudiosFromType.PLAYLIST, id);
+      songsList =
+          await audioQuery.queryAudiosFrom(AudiosFromType.PLAYLIST, playlistId);
       logger.i('Fetch songs from playlist is succcessful $songsList');
     } catch (e) {
       logger.e('Error fetching song from playlist: $e');
@@ -140,9 +144,10 @@ class MusicSettings {
   }
 
   // Method to filter out songs already present in the playlist
-  Future<List<SongModel>> filterSongsInPlaylist(int playListId) async {
+  Future<List<SongModel>> filterSongsInPlaylist(
+      {required int playListId}) async {
     final fetchAllSongs = await fetchAudioFiles();
-    final playListSongs = await fetchSongsFromPlayList(playListId);
+    final playListSongs = await fetchSongsFromPlayList(playlistId: playListId);
 
     List<SongModel> filteredSongsList = fetchAllSongs
         .where((song) => !playListSongs.any(
@@ -150,5 +155,31 @@ class MusicSettings {
         .toList();
 
     return filteredSongsList;
+  }
+
+  Future<List<SongModel>> fetchSongsfForArtist(
+      {required String artistName}) async {
+    List<SongModel> artistSongs = [];
+    try {
+      artistSongs =
+          await audioQuery.queryAudiosFrom(AudiosFromType.ARTIST, artistName);
+      logger.i('Songs fetched for artist successfully $artistSongs');
+    } catch (e) {
+      logger.e('Error fetching songs for artist: $e');
+    }
+    return artistSongs;
+  }
+
+  Future<List<SongModel>> fetchSongsForAlbum(
+      {required String albumName}) async {
+    List<SongModel> albumSongs = [];
+    try {
+      albumSongs =
+          await audioQuery.queryAudiosFrom(AudiosFromType.ALBUM, albumName);
+      logger.i('Songs fetched for album successfully $albumSongs');
+    } catch (e) {
+      logger.e('Error fetching songs for album: $e');
+    }
+    return albumSongs;
   }
 }

@@ -26,8 +26,8 @@ class _SelectSongScreenState extends State<SelectSongScreen> {
   }
 
   Future<void> fetchFilteredList() async {
-    filteredSongsList =
-        await musicSettings.filterSongsInPlaylist(widget.playListId);
+    filteredSongsList = await musicSettings.filterSongsInPlaylist(
+        playListId: widget.playListId);
     setState(() {});
   }
 
@@ -86,7 +86,9 @@ class _SelectSongScreenState extends State<SelectSongScreen> {
                   onPressed: () async {
                     // Call the function to add selected songs to the playlist
                     final success = await musicSettings.addSongsToPlaylist(
-                        widget.playListId, selectedSongs);
+                      playlistId: widget.playListId,
+                      songList: selectedSongs,
+                    );
 
                     if (success) {
                       // If songs are added successfully, navigate back
