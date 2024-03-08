@@ -9,8 +9,9 @@ import '../../widgets/playing_song_screen.dart';
 import '../models/audio_model.dart';
 import '../models/music_settings_model.dart';
 import '../models/shared_data_model.dart';
-import 'selected_song_view.dart';
-import 'song_list_view.dart';
+import '../widgets/leading_icon.dart';
+import '../widgets/selected_song_view.dart';
+import '../widgets/song_list_view.dart';
 
 class SongListScreen extends StatefulWidget {
   const SongListScreen({
@@ -103,11 +104,18 @@ class _SongListScreenState extends State<SongListScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done &&
                       snapshot.data != null) {
-                    return CircleAvatar(
-                      backgroundImage: MemoryImage(snapshot.data as Uint8List),
+                    return LeadingIcon(
+                      icon: Image.memory(
+                        snapshot.data
+                            as Uint8List, // Adjust the BoxFit as needed
+                      ),
                     );
+
+                    // CircleAvatar(
+                    //   backgroundImage: MemoryImage(snapshot.data as Uint8List),
+                    // );
                   } else {
-                    return const Icon(Icons.music_note);
+                    return const LeadingIcon(icon: Icon(Icons.music_note));
                   }
                 },
               ),
@@ -123,10 +131,17 @@ class _SongListScreenState extends State<SongListScreen> {
             child: Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [
+                    Colors.yellow.shade200,
+                    Colors.pink.shade200,
+                  ],
+                ),
                 borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20)),
-                color: Colors.white,
                 border: Border.all(
                   color: Colors.grey,
                 ),

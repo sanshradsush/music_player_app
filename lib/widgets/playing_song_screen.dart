@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../common/models/audio_model.dart';
 import '../common/models/shared_data_model.dart';
+import '../common/screens/scaffold.dart';
 import '../common/widgets/selected_song_view.dart';
 
 class PlayingSongScreen extends StatefulWidget {
@@ -114,8 +115,8 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ChangeNotifierProvider(
+    return ScaffoldScreen(
+      child: ChangeNotifierProvider(
         create: (context) => AudioPlayerModel(),
         child: Container(
           padding: const EdgeInsets.fromLTRB(8, 40, 8, 16),
