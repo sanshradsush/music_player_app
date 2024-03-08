@@ -93,9 +93,11 @@ class _SelectSongScreenState extends State<SelectSongScreen> {
                     if (success) {
                       // If songs are added successfully, navigate back
 
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                     } else {
                       // Handle failure, such as showing a snackbar
+                      // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text('Failed to add songs to the playlist.'),
                       ));
