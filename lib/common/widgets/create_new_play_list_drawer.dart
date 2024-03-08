@@ -80,6 +80,7 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
                   if (playlistName.isNotEmpty) {
                     await musicSettings.createPlaylist(
                         playlistName: playlistName);
+                    // ignore: use_build_context_synchronously
                     Navigator.of(context).pop();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
