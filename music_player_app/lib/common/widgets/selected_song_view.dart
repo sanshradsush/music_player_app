@@ -28,9 +28,11 @@ class SelectedSongView extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(10),
         ),
-        title: Text(title,
+        title: Text(
+          title,
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,),
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Text(artist),
         leading: leadingIcon,
         trailing: trailingIcon,

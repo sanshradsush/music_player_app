@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import '../models/music_settings_model.dart';
+import 'album_playlist.dart';
 
 class AlbumScreen extends StatefulWidget {
   const AlbumScreen({
@@ -50,6 +51,16 @@ class _AlbumScreenState extends State<AlbumScreen> {
                   ),
                   title: Text(albums[index].album),
                   subtitle: Text('${albums[index].artist}'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AlbumPlayList(
+                          album: albums[index],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

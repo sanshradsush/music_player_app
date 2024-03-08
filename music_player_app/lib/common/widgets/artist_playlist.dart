@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
-import '../common/models/music_settings_model.dart';
-import '../common/widgets/select_song_screen.dart';
+import '../models/music_settings_model.dart';
 
-class ViewPlaylist extends StatefulWidget {
-  const ViewPlaylist({super.key, required this.selectedPlayList});
+class ArtistPlayList extends StatefulWidget {
+  const ArtistPlayList({
+    required this.artist,
+    super.key,
+  });
 
-  final PlaylistModel selectedPlayList;
+  final ArtistModel artist;
 
   @override
-  State<ViewPlaylist> createState() => _ViewPlaylistState();
+  State<ArtistPlayList> createState() => _ArtistPlayListState();
 }
 
-class _ViewPlaylistState extends State<ViewPlaylist> {
+class _ArtistPlayListState extends State<ArtistPlayList> {
   final MusicSettings musicSettings = MusicSettings.instance;
   List<SongModel> songs = [];
 
@@ -24,8 +26,8 @@ class _ViewPlaylistState extends State<ViewPlaylist> {
   }
 
   Future<void> fetchPlayListSongs() async {
-    songs = await musicSettings.fetchSongsFromPlayList(
-      playlistId: widget.selectedPlayList.id,
+    songs = await musicSettings.fetchSongsfForArtist(
+      artistName: widget.artist.artist,
     );
     setState(() {});
   }
@@ -62,7 +64,7 @@ class _ViewPlaylistState extends State<ViewPlaylist> {
                     width: 8,
                   ), // Add some space between the icon and playlist name
                   Text(
-                    widget.selectedPlayList.playlist,
+                    widget.artist.artist,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -82,21 +84,6 @@ class _ViewPlaylistState extends State<ViewPlaylist> {
                     style: const TextStyle(
                       fontSize: 16,
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SelectSongScreen(
-                            playListId: widget.selectedPlayList.id,
-                          ),
-                        ),
-                      ).then((_) async {
-                        await fetchPlayListSongs();
-                      });
-                    },
                   ),
                 ],
               ),
