@@ -104,10 +104,12 @@ class MusicSettings {
     return true;
   }
 
-  Future<bool> addToPlaylist(int playlistId, int songId) async {
+  Future<bool> addSongsToPlaylist(int playlistId, List<SongModel> songList) async {
     try {
-      await audioQuery.addToPlaylist(playlistId, songId);
-      logger.i('Song added to playlist successfully');
+      for (SongModel song in songList) {
+        await audioQuery.addToPlaylist(playlistId, song.id);
+        logger.i('Song added to playlist successfully');
+      }
     } catch (e) {
       logger.e('Error adding song to playlist: $e');
       return false;
@@ -125,4 +127,29 @@ class MusicSettings {
     }
     return true;
   }
+
+  Future<List<SongModel>> fetchSongsFromPlayList(int id) async {
+    List<SongModel> songsList = [];
+    try {
+      songsList = await audioQuery.queryAudiosFrom(AudiosFromType.PLAYLIST, id);
+      logger.i('Fetch songs from playlist is succcessful $songsList');
+    } catch (e) {
+      logger.e('Error fetching song from playlist: $e');
+    }
+    return songsList;
+  }
+
+  // Method to filter out songs already present in the playlist
+  Future<List<SongModel>> filterSongsInPlaylist(int playListId) async {
+    final fetchAllSongs = await fetchAudioFiles();
+    final playListSongs = await fetchSongsFromPlayList(playListId);
+
+      List<SongModel> filteredSongsList = fetchAllSongs
+          .where((song) => !playListSongs.any((playlistSong) => song.id == playlistSong.id))
+          .toList();
+
+    logger.i('filtered Songs List $filteredSongsList');
+    return filteredSongsList;
+  }
+
 }
