@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/music_settings_model.dart';
 import '../models/shared_data_model.dart';
 
 class CreatePlayListDrawer extends StatefulWidget {
@@ -10,6 +11,7 @@ class CreatePlayListDrawer extends StatefulWidget {
 }
 
 class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
+  MusicSettings musicSettings = MusicSettings.instance;
   final TextEditingController _playlistNameController = TextEditingController();
   LocalSavingDataModel localSavingDataModel = LocalSavingDataModel();
 
@@ -73,8 +75,7 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
                 onPressed: () async {
                   String playlistName = _playlistNameController.text.trim();
                   if (playlistName.isNotEmpty) {
-                    await localSavingDataModel.createNewPlayList(playlistName);
-                    await localSavingDataModel.getPlayLists();
+                    await musicSettings.createPlaylist(playlistName);
                     Navigator.of(context).pop();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
