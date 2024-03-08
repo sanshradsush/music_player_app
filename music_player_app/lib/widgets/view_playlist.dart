@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:sound_spin/common/models/music_settings_model.dart';
-import 'package:sound_spin/common/widgets/SelectSongScreen.dart';
 
-import '../common/models/shared_data_model.dart';
+import '../common/models/music_settings_model.dart';
+import '../common/widgets/select_song_screen.dart';
 
 class ViewPlaylist extends StatefulWidget {
-  const ViewPlaylist({
-    required this.selectedPlayList
-  }) ;
+  const ViewPlaylist({super.key, required this.selectedPlayList});
 
   final PlaylistModel selectedPlayList;
-
 
   @override
   State<ViewPlaylist> createState() => _ViewPlaylistState();
@@ -28,14 +24,13 @@ class _ViewPlaylistState extends State<ViewPlaylist> {
   }
 
   Future<void> fetchPlayListSongs() async {
-      songs = await musicSettings.fetchSongsFromPlayList(widget.selectedPlayList.id);
-      setState(() {
-      });
+    songs =
+        await musicSettings.fetchSongsFromPlayList(widget.selectedPlayList.id);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    // List<SongModel> filteredSongs = LocalSavingDataModel().filterSongsInPlaylist(allSongsList, songList) as List<SongModel>;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -62,7 +57,9 @@ class _ViewPlaylistState extends State<ViewPlaylist> {
                       Navigator.pop(context);
                     },
                   ),
-                  const SizedBox(width: 8), // Add some space between the icon and playlist name
+                  const SizedBox(
+                    width: 8,
+                  ), // Add some space between the icon and playlist name
                   Text(
                     widget.selectedPlayList.playlist,
                     style: const TextStyle(
@@ -74,13 +71,14 @@ class _ViewPlaylistState extends State<ViewPlaylist> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(25.0, 0, 8.0, 8.0), // Adjust the left padding here
+              padding: const EdgeInsets.fromLTRB(
+                  25.0, 0, 8.0, 8.0), // Adjust the left padding here
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Songs (${songs.length})',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                     ),
                   ),
@@ -94,7 +92,9 @@ class _ViewPlaylistState extends State<ViewPlaylist> {
                             playListId: widget.selectedPlayList.id,
                           ),
                         ),
-                      );
+                      ).then((_) async {
+                        await fetchPlayListSongs();
+                      });
                     },
                   ),
                 ],

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import '../models/music_settings_model.dart';
-import '../models/shared_data_model.dart';
+import 'circular_check_box.dart';
 
 class SelectSongScreen extends StatefulWidget {
   const SelectSongScreen({
     required this.playListId,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final int playListId;
 
   @override
-  _SelectSongScreenState createState() => _SelectSongScreenState();
+  State createState() => _SelectSongScreenState();
 }
 
 class _SelectSongScreenState extends State<SelectSongScreen> {
@@ -26,17 +26,16 @@ class _SelectSongScreenState extends State<SelectSongScreen> {
   }
 
   Future<void> fetchFilteredList() async {
-      filteredSongsList = await musicSettings.filterSongsInPlaylist(widget.playListId);
-      setState(() {
-      });
+    filteredSongsList =
+        await musicSettings.filterSongsInPlaylist(widget.playListId);
+    setState(() {});
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Songs'),
+        title: const Text('Select Songs'),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -58,16 +57,20 @@ class _SelectSongScreenState extends State<SelectSongScreen> {
                   final song = filteredSongsList[index];
                   final isSelected = selectedSongs.contains(song);
 
-                  return CheckboxListTile(
-                    title: Text(song.title),
-                    subtitle: Text(song.artist ?? ''),
-                    value: isSelected,
-                    onChanged: (value) {
+                  return GestureDetector(
+                    child: ListTile(
+                      leading: CircularCheckbox(
+                        value: isSelected,
+                      ),
+                      title: Text(song.title),
+                      subtitle: Text(song.artist ?? ''),
+                    ),
+                    onTap: () {
                       setState(() {
-                        if (value != null && value) {
-                          selectedSongs.add(song);
-                        } else {
+                        if (isSelected) {
                           selectedSongs.remove(song);
+                        } else {
+                          selectedSongs.add(song);
                         }
                       });
                     },
@@ -76,13 +79,27 @@ class _SelectSongScreenState extends State<SelectSongScreen> {
               ),
             ),
             if (selectedSongs.isNotEmpty)
-              SizedBox(
-                height: 60, // Adjust the height as needed
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(left: 30, right: 30),
                 child: ElevatedButton(
-                  onPressed: () {
-                    _addSelectedSongsToPlaylist();
+                  onPressed: () async {
+                    // Call the function to add selected songs to the playlist
+                    final success = await musicSettings.addSongsToPlaylist(
+                        widget.playListId, selectedSongs);
+
+                    if (success) {
+                      // If songs are added successfully, navigate back
+
+                      Navigator.pop(context);
+                    } else {
+                      // Handle failure, such as showing a snackbar
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Failed to add songs to the playlist.'),
+                      ));
+                    }
                   },
-                  child: Text(
+                  child: const Text(
                     'OK',
                     style: TextStyle(fontSize: 20),
                   ),
@@ -92,20 +109,5 @@ class _SelectSongScreenState extends State<SelectSongScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _addSelectedSongsToPlaylist() async {
-    // Call the function to add selected songs to the playlist
-    final success = await musicSettings.addSongsToPlaylist(widget.playListId, selectedSongs);
-
-    if (success) {
-      // If songs are added successfully, navigate back
-      Navigator.pop(context);
-    } else {
-      // Handle failure, such as showing a snackbar
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Failed to add songs to the playlist.'),
-      ));
-    }
   }
 }
