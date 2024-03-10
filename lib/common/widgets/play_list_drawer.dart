@@ -3,36 +3,51 @@ import 'package:flutter/material.dart';
 import '../models/music_settings_model.dart';
 import '../models/shared_data_model.dart';
 
-class CreatePlayListDrawer extends StatefulWidget {
-  const CreatePlayListDrawer({
+class PlayListDrawer extends StatefulWidget {
+  const PlayListDrawer({
+    required this.title,
+    this.intialText,
+    required this.onSaved,
+    required this.onCancel,
     super.key,
   });
 
+  final String title;
+  final String? intialText;
+  final Function(String) onSaved;
+  final VoidCallback onCancel;
+
   @override
-  State createState() => _CreatePlayListDrawerState();
+  State createState() => _PlayListDrawerState();
 }
 
-class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
+class _PlayListDrawerState extends State<PlayListDrawer> {
   MusicSettings musicSettings = MusicSettings.instance;
-  final TextEditingController _playlistNameController = TextEditingController();
+  TextEditingController? _playlistNameController;
   LocalSavingDataModel localSavingDataModel = LocalSavingDataModel();
 
   @override
   void dispose() {
-    _playlistNameController.dispose();
+    _playlistNameController?.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _playlistNameController = TextEditingController(text: widget.intialText);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-        border: Border.all(
-          color: Colors.grey,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
         ),
-        boxShadow: const [
+        color: Colors.white,
+        boxShadow: [
           BoxShadow(
             spreadRadius: 2,
             blurRadius: 1,
@@ -46,7 +61,7 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
             padding: const EdgeInsets.only(top: 20),
             child: Center(
               child: Text(
-                'Create New Playlist',
+                widget.title,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
@@ -56,8 +71,12 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
             child: TextField(
               controller: _playlistNameController,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Playlist Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+                hintText: 'Enter playlist name',
               ),
             ),
           ),
@@ -65,9 +84,7 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => widget.onCancel(),
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
@@ -75,21 +92,9 @@ class _CreatePlayListDrawerState extends State<CreatePlayListDrawer> {
                 child: const Text('Cancel'),
               ),
               ElevatedButton(
-                onPressed: () async {
-                  String playlistName = _playlistNameController.text.trim();
-                  if (playlistName.isNotEmpty) {
-                    await musicSettings.createPlaylist(
-                        playlistName: playlistName);
-                    // ignore: use_build_context_synchronously
-                    Navigator.of(context).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter a playlist name'),
-                      ),
-                    );
-                  }
-                },
+                onPressed: () => widget.onSaved(
+                  (_playlistNameController?.text ?? '').trim(),
+                ),
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
