@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import '../models/music_settings_model.dart';
-import 'artist_playlist.dart';
+import '../widgets/album_playlist.dart';
+import '../widgets/leading_icon.dart';
 
-class ArtistsScreen extends StatefulWidget {
-  const ArtistsScreen({
+class AlbumScreen extends StatefulWidget {
+  const AlbumScreen({
     super.key,
   });
 
   @override
-  State<ArtistsScreen> createState() => _ArtistsScreenState();
+  State<AlbumScreen> createState() => _AlbumScreenState();
 }
 
-class _ArtistsScreenState extends State<ArtistsScreen> {
+class _AlbumScreenState extends State<AlbumScreen> {
   MusicSettings musicSettings = MusicSettings.instance;
-  List<ArtistModel> artists = [];
+  List<AlbumModel> albums = [];
 
   @override
   void initState() {
     super.initState();
-    fetchArtistlists();
+    fetchAlbums();
   }
 
-  Future<void> fetchArtistlists() async {
-    final fetchedPlaylists = await musicSettings.fetchArtists();
+  Future<void> fetchAlbums() async {
+    final fetchedPlaylists = await musicSettings.fetchAlbums();
     setState(() {
-      artists = fetchedPlaylists;
+      albums = fetchedPlaylists;
     });
   }
 
@@ -36,28 +37,30 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Artist(${artists.length})',
-            style: Theme.of(context).textTheme.titleLarge,
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: Text(
+              'Albums(${albums.length})',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           ),
           const SizedBox(height: 20),
           Expanded(
             child: ListView.builder(
-              itemCount: artists.length,
+              itemCount: albums.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.person),
+                  leading: const LeadingIcon(
+                    icon: Icon(Icons.person),
                   ),
-                  title: Text(artists[index].artist),
-                  subtitle: Text(
-                      '${artists[index].numberOfAlbums} albums | ${artists[index].numberOfTracks} songs'),
+                  title: Text(albums[index].album),
+                  subtitle: Text('${albums[index].artist}'),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ArtistPlayList(
-                          artist: artists[index],
+                        builder: (context) => AlbumPlayList(
+                          album: albums[index],
                         ),
                       ),
                     );

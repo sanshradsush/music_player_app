@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:sound_spin/widgets/view_playlist.dart';
+import 'package:sound_spin/common/widgets/view_playlist.dart';
 import '../models/music_settings_model.dart';
-import 'create_new_play_list_drawer.dart';
+import '../widgets/leading_icon.dart';
+import '../widgets/new_play_list_drawer.dart';
 import '../models/shared_data_model.dart';
 
 class PlayListScreen extends StatefulWidget {
@@ -39,35 +40,41 @@ class _PlayListScreenState extends State<PlayListScreen> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('Playlist(${playlists.length})',
-                  style: Theme.of(context).textTheme.titleLarge),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return const CreatePlayListDrawer();
-                        },
-                      ).then((_) async {
-                        await fetchPlaylists();
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () {},
-                  ),
-                ],
-              )
-            ],
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Playlist(${playlists.length})',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return const CreatePlayListDrawer();
+                          },
+                        ).then((_) async {
+                          await fetchPlaylists();
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.more_vert),
+                      onPressed: () {},
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
           const SizedBox(height: 20),
           Expanded(
@@ -75,6 +82,9 @@ class _PlayListScreenState extends State<PlayListScreen> {
               itemCount: playlists.length,
               itemBuilder: (context, index) {
                 return ListTile(
+                  leading: const LeadingIcon(
+                    icon: Icon(Icons.person),
+                  ),
                   title: Text(playlists[index].playlist),
                   onTap: () async {
                     Navigator.push(
@@ -85,7 +95,6 @@ class _PlayListScreenState extends State<PlayListScreen> {
                       ),
                     );
                   },
-                  // Add functionality for each playlist item if needed
                 );
               },
             ),

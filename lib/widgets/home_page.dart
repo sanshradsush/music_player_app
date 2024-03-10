@@ -3,10 +3,11 @@ import 'package:logger/logger.dart';
 
 import '../common/models/shared_data_model.dart';
 import '../common/models/side_bar_model.dart';
-import '../common/widgets/album_screen.dart';
-import '../common/widgets/artists_screen.dart';
-import '../common/widgets/playlist_screen.dart';
-import '../common/widgets/song_list_screen.dart';
+import '../common/screens/album_screen.dart';
+import '../common/screens/artists_screen.dart';
+import '../common/screens/playlist_screen.dart';
+import '../common/screens/scaffold.dart';
+import '../common/screens/song_list_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -48,13 +49,24 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldScreen(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.yellow.shade200,
         title: const Text('Music Player'),
         bottom: TabBar(
+          dividerColor: Colors.black,
+          labelColor: Colors.black,
+          labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              fontSize: 16,
+          ),
+          unselectedLabelColor: Colors.grey,
+          unselectedLabelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.normal,
+            fontSize: 12,
+          ),
+          
           controller: _tabController,
-          indicatorPadding: EdgeInsets.zero,
           isScrollable: true,
           tabs: [
             for (SideBar item in SideBar.values)
@@ -64,7 +76,7 @@ class _HomePageState extends State<HomePage>
           ],
         ),
       ),
-      body: TabBarView(
+      child: TabBarView(
         controller: _tabController,
         children: [
           songListScreeen,
@@ -74,7 +86,7 @@ class _HomePageState extends State<HomePage>
             child: Text('Folders'),
           ),
           albumScreen,
-          artistsScreen
+          artistsScreen,
         ],
       ),
     );

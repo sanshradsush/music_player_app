@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
@@ -181,5 +183,18 @@ class MusicSettings {
       logger.e('Error fetching songs for album: $e');
     }
     return albumSongs;
+  }
+
+  Future<Uint8List?> getArtwork(int songId) async {
+    Future<Uint8List?>? artworkFuture;
+    try {
+      final Uint8List? artwork = await OnAudioQuery()
+          .queryArtwork(songId, ArtworkType.AUDIO, size: 200);
+      artwork != null ? artworkFuture = Future.value(artwork) : null;
+    } catch (e) {
+      Logger().e('Error fetching artwork: $e');
+    }
+
+    return artworkFuture;
   }
 }

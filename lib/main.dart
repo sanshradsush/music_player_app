@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'common/models/audio_model.dart';
 import 'common/models/music_settings_model.dart';
 import 'common/models/shared_data_model.dart';
+import 'common/screens/scaffold.dart';
 import 'widgets/home_page.dart';
 
 void main() async {
@@ -75,22 +76,21 @@ class _MyAppState extends State<MyApp> {
 
     return storageAccess
         ? MaterialApp(
-            home: Scaffold(
+            home: ScaffoldScreen(
               key: scaffoldKey,
-              body: ChangeNotifierProvider(
+              child: ChangeNotifierProvider(
                 create: (context) => AudioPlayerModel(),
                 child: const HomePage(),
               ),
             ),
           )
         : MaterialApp(
-            home: Scaffold(
+            home: ScaffoldScreen(
               appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
                 title: const Text('Music Player'),
               ),
               key: scaffoldKey,
-              body: Center(
+              child: Center(
                 child: TextButton(
                   onPressed: () async {
                     await requestPermissions();
