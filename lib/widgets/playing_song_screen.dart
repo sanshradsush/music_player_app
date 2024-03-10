@@ -30,6 +30,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
   Future<Uint8List>? _artworkFuture;
   bool shuffleEnable = true;
   bool loopEnable = false;
+  bool isSongLiked = false;
   late TabController _tabController;
   SongModel? selectedSong;
 
@@ -49,6 +50,7 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
     selectedSong = widget.selectedSong;
     getArtwork(selectedSong?.id ?? 0);
     updateShuffleAndLoop();
+    updatelikeUnlike(selectedSong!);
   }
 
   void updateShuffleAndLoop() async {
@@ -113,6 +115,19 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
     );
   }
 
+  void likeUnlikeSong(SongModel song) async {
+    isSongLiked = !isSongLiked;
+    isSongLiked
+        ? await localSavingDataModel.addLikedSong(song)
+        : await localSavingDataModel.removeLikedSong(song);
+    setState(() {});
+  }
+
+  void updatelikeUnlike(SongModel song) async {
+    isSongLiked = await localSavingDataModel.checkForLikedSong(song);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldScreen(
@@ -155,12 +170,6 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                   children: [
                     Column(
                       children: [
-                        SelectedSongView(
-                          title: selectedSong?.title ?? 'Unknown',
-                          artist: selectedSong?.artist ?? 'Unknown',
-                          leadingIcon: const Icon(Icons.music_note),
-                        ),
-
                         Expanded(
                           child: FutureBuilder(
                             future: _artworkFuture ??
@@ -192,6 +201,28 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                           ),
                         ),
                         const SizedBox(height: 20),
+                        SelectedSongView(
+                          title: selectedSong?.title ?? 'Unknown',
+                          artist: selectedSong?.artist ?? 'Unknown',
+                          leadingIcon: const Icon(Icons.music_note),
+                          trailingIcon: IconButton(
+                            icon: isSongLiked
+                                ? const ImageIcon(
+                                    AssetImage("assets/images/heart.png"),
+                                    color: Colors.black,
+                                    size: 20,
+                                  )
+                                : const ImageIcon(
+                                    AssetImage("assets/images/love.png"),
+                                    color: Colors.black,
+                                    size: 20,
+                                  ),
+                            onPressed: () {
+                              likeUnlikeSong(selectedSong!);
+                              setState(() {});
+                            },
+                          ),
+                        ),
                         // Progress bar
                         Consumer<AudioPlayerModel>(
                           builder: (context, audioModel, child) {
