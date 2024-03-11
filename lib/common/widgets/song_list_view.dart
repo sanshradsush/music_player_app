@@ -5,6 +5,7 @@ class SongListView extends StatelessWidget {
     required this.title,
     required this.artist,
     this.leadingIcon,
+    this.onTapOfMoreIcon,
     this.onTap,
     super.key,
   });
@@ -12,19 +13,26 @@ class SongListView extends StatelessWidget {
   final String title;
   final String artist;
   final Widget? leadingIcon;
-  final void Function()? onTap;
+  final VoidCallback? onTap;
+  final VoidCallback? onTapOfMoreIcon;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListTile(
-        title: Text(title,
+        title: Text(
+          title,
           maxLines: 1,
-          overflow: TextOverflow.ellipsis,),
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Text(artist),
         leading: leadingIcon,
         onTap: onTap,
+        trailing: IconButton(
+          icon: const Icon(Icons.more_vert),
+          onPressed: onTapOfMoreIcon,
+        ),
       ),
     );
   }

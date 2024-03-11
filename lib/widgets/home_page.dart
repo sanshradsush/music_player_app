@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:sound_spin/common/models/music_settings_model.dart';
 
 import '../common/models/shared_data_model.dart';
 import '../common/models/side_bar_model.dart';
@@ -36,10 +37,12 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  late final songListScreeen = const SongListScreen();
+  late final songListScreeen = SongListScreen(
+    songList: MusicSettings.songsList,
+  );
 
-  late final likedSongsScreen = const SongListScreen(
-    likedTab: true,
+  late final likedSongsScreen = SongListScreen(
+    songList: MusicSettings.likedSongsList,
   );
 
   late final playListScreen = const PlayListScreen();
@@ -58,14 +61,14 @@ class _HomePageState extends State<HomePage>
           labelColor: Colors.black,
           labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-              fontSize: 16,
-          ),
+                fontSize: 16,
+              ),
           unselectedLabelColor: Colors.grey,
-          unselectedLabelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-            fontWeight: FontWeight.normal,
-            fontSize: 12,
-          ),
-          
+          unselectedLabelStyle:
+              Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.normal,
+                    fontSize: 12,
+                  ),
           controller: _tabController,
           isScrollable: true,
           tabs: [

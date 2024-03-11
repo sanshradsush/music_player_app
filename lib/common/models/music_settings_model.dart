@@ -17,7 +17,9 @@ class MusicSettings {
   static MusicSettings get instance => _instance;
 
   static SongModel? selectedSong;
-  static List<SongModel> songs = [];
+  static List<SongModel> songsList = [];
+  static List<SongModel> likedSongsList = [];
+
   static bool isShuffle = false;
   static bool isRepeat = false;
   static bool isLooped = false;
@@ -26,16 +28,25 @@ class MusicSettings {
     selectedSong = value;
   }
 
+  set setSongsList(List<SongModel> value) {
+    songsList = value;
+  }
+
+  set setLikedSongsList(List<SongModel> value) {
+    likedSongsList = value;
+  }
+
   // Add your methods and properties here
   Future<List<SongModel>> fetchAudioFiles() async {
+    List<SongModel> songsLists = [];
     try {
-      songs = await audioQuery.querySongs();
+      songsLists = await audioQuery.querySongs();
 
-      logger.i('Audio files fetched successfully from the device $songs');
+      logger.i('Audio files fetched successfully from the device $songsList');
     } catch (e) {
       logger.e('Error fetching audio files: $e');
     }
-    return songs;
+    return songsLists;
   }
 
   Future<List<AlbumModel>> fetchAlbums() async {
