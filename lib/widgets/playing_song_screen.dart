@@ -219,7 +219,6 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                                   ),
                             onPressed: () {
                               likeUnlikeSong(selectedSong!);
-                              setState(() {});
                             },
                           ),
                         ),
