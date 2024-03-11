@@ -176,6 +176,7 @@ class _SongListScreenState extends State<SongListScreen> {
                           selectedSong = MusicSettings.selectedSong;
                           selectedSongLiked = await localSavingDataModel
                               .checkForLikedSong(selectedSong!);
+                          fetchSongs();
                           setState(() {});
                         });
                       },
