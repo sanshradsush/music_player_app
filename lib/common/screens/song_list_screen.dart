@@ -169,12 +169,14 @@ class _SongListScreenState extends State<SongListScreen> {
                               songList: songList,
                             );
                           },
-                        ).then((currentSong) {
+                        ).then((currentSong) async {
                           logger
                               .d('Current song: ${MusicSettings.selectedSong}');
-                          setState(() {
-                            selectedSong = MusicSettings.selectedSong;
-                          });
+
+                          selectedSong = MusicSettings.selectedSong;
+                          selectedSongLiked = await localSavingDataModel
+                              .checkForLikedSong(selectedSong!);
+                          setState(() {});
                         });
                       },
                       trailingIcon: Row(
