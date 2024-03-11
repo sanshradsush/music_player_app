@@ -105,6 +105,29 @@ class MusicSettings {
     return true;
   }
 
+  Future<bool> renamePlaylist({
+    required int playlistId,
+    required String newName,
+  }) async {
+    try {
+      final playLists = await fetchPlaylists();
+      for (PlaylistModel playlist in playLists) {
+        if (playlist.id == playlistId) {
+          if (playlist.playlist == newName) {
+            logger.i('Playlist is already renamed with the name: $newName');
+            return false;
+          }
+        }
+      }
+      await audioQuery.renamePlaylist(playlistId, newName);
+      logger.i('Playlist renamed successfully');
+    } catch (e) {
+      logger.e('Error renaming playlist: $e');
+      return false;
+    }
+    return true;
+  }
+
   Future<bool> addSongsToPlaylist({
     required int playlistId,
     required List<SongModel> songList,
@@ -188,8 +211,8 @@ class MusicSettings {
   Future<Uint8List?> getArtwork(int songId) async {
     Future<Uint8List?>? artworkFuture;
     try {
-      final Uint8List? artwork = await OnAudioQuery()
-          .queryArtwork(songId, ArtworkType.AUDIO, size: 200);
+      final Uint8List? artwork =
+          await audioQuery.queryArtwork(songId, ArtworkType.AUDIO, size: 200);
       artwork != null ? artworkFuture = Future.value(artwork) : null;
     } catch (e) {
       Logger().e('Error fetching artwork: $e');
