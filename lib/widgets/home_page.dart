@@ -43,6 +43,7 @@ class _HomePageState extends State<HomePage>
 
   late final likedSongsScreen = SongListScreen(
     songList: MusicSettings.likedSongsList,
+    isLikedTab: true,
   );
 
   late final playListScreen = const PlayListScreen();

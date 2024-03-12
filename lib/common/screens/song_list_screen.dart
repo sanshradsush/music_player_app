@@ -21,10 +21,12 @@ import 'song_info_screen.dart';
 class SongListScreen extends StatefulWidget {
   const SongListScreen({
     required this.songList,
+    this.isLikedTab = false,
     super.key,
   });
 
   final List<SongModel> songList;
+  final bool isLikedTab;
 
   @override
   State<SongListScreen> createState() => _SongListScreenState();
@@ -43,7 +45,11 @@ class _SongListScreenState extends State<SongListScreen> {
   @override
   void initState() {
     super.initState();
-    updateSelectedSongFromLocalStorage();
+    if (widget.isLikedTab) {
+      songList = MusicSettings.likedSongsList;
+    } else {
+      updateSelectedSongFromLocalStorage();
+    }
   }
 
   @override
@@ -64,18 +70,19 @@ class _SongListScreenState extends State<SongListScreen> {
   }
 
   Future<void> updateSelectedSongFromLocalStorage() async {
-    logger.d('Updating selected song from local storage');
+    logger
+        .d('Updating selected song from local storage --> ${widget.songList}');
     final song = await localSavingDataModel.getCurrentPlayingSong();
     if (song != null) {
       final isLiked = await localSavingDataModel.checkForLikedSong(song);
       logger
           .d('Updating selected song from local storage --> $song \n $isLiked');
-      setState(() {
-        selectedSong = song;
-        selectedSongLiked = isLiked;
-        songList = widget.songList;
-      });
+      selectedSong = song;
+      selectedSongLiked = isLiked;
     }
+
+    songList = widget.songList;
+    setState(() {});
   }
 
   void _showDeleteBottonSheet(BuildContext context, SongModel songModel) {
@@ -268,18 +275,31 @@ class _SongListScreenState extends State<SongListScreen> {
                             IconButton(
                               onPressed: () async {
                                 if (selectedSongLiked) {
-                                  await localSavingDataModel
+                                  final unliked = await localSavingDataModel
                                       .removeLikedSong(selectedSong!);
-                                  songList.remove(selectedSong);
-                                  MusicSettings.likedSongsList = songList;
-
-                                  selectedSongLiked = false;
-                                  setState(() {});
+                                  if (unliked) {
+                                    MusicSettings.likedSongsList =
+                                        await localSavingDataModel
+                                            .getLikedSongs();
+                                    if (widget.isLikedTab) {
+                                      songList = MusicSettings.likedSongsList;
+                                    }
+                                    selectedSongLiked = false;
+                                    setState(() {});
+                                  }
                                 } else {
-                                  await localSavingDataModel
+                                  final isLiked = await localSavingDataModel
                                       .addLikedSong(selectedSong!);
-                                  songList.add(selectedSong!);
-                                  MusicSettings.likedSongsList = songList;
+                                  if (isLiked) {
+                                    MusicSettings.likedSongsList =
+                                        await localSavingDataModel
+                                            .getLikedSongs();
+                                    if (widget.isLikedTab) {
+                                      songList = MusicSettings.likedSongsList;
+                                    }
+                                    selectedSongLiked = true;
+                                    setState(() {});
+                                  }
                                 }
                               },
                               icon: selectedSongLiked

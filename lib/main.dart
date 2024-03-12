@@ -68,6 +68,12 @@ class _MyAppState extends State<MyApp> {
         statuses[Permission.storage] == PermissionStatus.granted) {
       logger.d('Storage permission granted');
       storageAccess = true;
+      MusicSettings.instance.setSongsList =
+          await MusicSettings.instance.fetchAudioFiles();
+      MusicSettings.instance.setLikedSongsList =
+          await LocalSavingDataModel().getLikedSongs();
+      MusicSettings.instance.setSelectedSong =
+          await LocalSavingDataModel().getCurrentPlayingSong();
       setState(() {});
     } else {
       logger.e('Storage permission not granted');
