@@ -18,6 +18,10 @@ void main() async {
   logger.i('Storage access: $storageAccess');
 
   if (storageAccess) {
+    MusicSettings.instance.setSongsList =
+        await MusicSettings.instance.fetchAudioFiles();
+    MusicSettings.instance.setLikedSongsList =
+        await LocalSavingDataModel().getLikedSongs();
     MusicSettings.instance.setSelectedSong =
         await LocalSavingDataModel().getCurrentPlayingSong();
   }

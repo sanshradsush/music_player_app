@@ -3,8 +3,8 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:sound_spin/common/screens/scaffold.dart';
 
 import '../models/music_settings_model.dart';
+import '../screens/song_list_screen.dart';
 import 'app_bar_widget.dart';
-import 'leading_icon.dart';
 
 class ArtistPlayList extends StatefulWidget {
   const ArtistPlayList({
@@ -60,23 +60,10 @@ class _ArtistPlayListState extends State<ArtistPlayList> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: songs.length,
-                itemBuilder: (context, index) {
-                  final song = songs[index];
-                  return ListTile(
-                    leading: const LeadingIcon(
-                      icon: Icon(Icons.music_note),
-                    ),
-                    title: Text(song.title),
-                    subtitle: Text(song.artist ?? ''),
-                    onTap: () {
-                      // Add logic to handle song tap
-                    },
-                  );
-                },
+              child: SongListScreen(
+                songList: songs,
               ),
-            ),
+            )
           ],
         ),
       ),
