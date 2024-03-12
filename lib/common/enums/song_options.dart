@@ -6,4 +6,6 @@ enum SongOptions {
   editTags,
   delete,
   rename,
+  info,
+  share,
 }

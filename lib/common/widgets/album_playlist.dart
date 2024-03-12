@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 import '../models/music_settings_model.dart';
+import '../screens/song_list_screen.dart';
 import 'app_bar_widget.dart';
 import '../screens/scaffold.dart';
-import 'leading_icon.dart';
 
 class AlbumPlayList extends StatefulWidget {
   const AlbumPlayList({
@@ -61,24 +61,10 @@ class _AlbumPlayListState extends State<AlbumPlayList> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                // padding: const EdgeInsets.fromLTRB(25.0, 0, 8.0, 8.0),
-                itemCount: songs.length,
-                itemBuilder: (context, index) {
-                  final song = songs[index];
-                  return ListTile(
-                    leading: const LeadingIcon(
-                      icon: Icon(Icons.music_note),
-                    ),
-                    title: Text(song.title),
-                    subtitle: Text(song.artist ?? ''),
-                    onTap: () {
-                      // Add logic to handle song tap
-                    },
-                  );
-                },
+              child: SongListScreen(
+                songList: songs,
               ),
-            ),
+            )
           ],
         ),
       ),
