@@ -207,19 +207,10 @@ class _PlayingSongScreenState extends State<PlayingSongScreen>
                           leadingIcon: const Icon(Icons.music_note),
                           trailingIcon: IconButton(
                             icon: isSongLiked
-                                ? const ImageIcon(
-                                    AssetImage("assets/images/heart.png"),
-                                    color: Colors.black,
-                                    size: 20,
-                                  )
-                                : const ImageIcon(
-                                    AssetImage("assets/images/love.png"),
-                                    color: Colors.black,
-                                    size: 20,
-                                  ),
-                            onPressed: () {
-                              likeUnlikeSong(selectedSong!);
-                            },
+                                ? const Icon(Icons.favorite,
+                                    color: Colors.green)
+                                : const Icon(Icons.favorite_border),
+                            onPressed: () => likeUnlikeSong(selectedSong!),
                           ),
                         ),
                         // Progress bar
