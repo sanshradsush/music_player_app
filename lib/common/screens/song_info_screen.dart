@@ -21,50 +21,158 @@ class SongInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Details', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 20),
-              Text('Title:\t\t ${songModel.title}'),
-              const SizedBox(height: 10),
-              Text('Artist:\t\t ${songModel.artist ?? 'Unknown'}'),
-              const SizedBox(height: 10),
-              Text('Album:\t\t ${songModel.album ?? 'Unknown'}'),
-              const SizedBox(height: 10),
-              Text(
-                'Duration:\t\t ${convertSecondsToMinutesAndSeconds(songModel.duration ?? 0)}',
-              ),
-              const SizedBox(height: 10),
-              Text('Size:\t\t ${(songModel.size / (2 * 1024))} MB'),
-              const SizedBox(height: 10),
-              Text('Genre:\t\t ${songModel.genre ?? 'Unknown'}'),
-              const SizedBox(height: 10),
-              Text('Location:\t\t ${songModel.data}'),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Cancel'),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Details', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Text('Title',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(': ${songModel.title}')),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Text('Artist',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(': ${songModel.artist ?? 'Unknown'}')),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Text('Album',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(': ${songModel.album ?? 'Unknown'}')),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Text('Duration',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                          ': ${convertSecondsToMinutesAndSeconds(songModel.duration ?? 0)}'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Text('Size',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                          ': ${(songModel.size / (2 * 1024)).toStringAsFixed(2)} MB'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Text('Genre',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(': ${songModel.genre ?? 'Unknown'}')),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 80,
+                      child: Text('Location',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(': ${songModel.data}')),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ButtonStyle(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                18.0), // Adjust border radius as needed
+                            side: const BorderSide(
+                                color: Colors.black), // Add border side
+                          ),
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: onEdit,
-                    child: const Text('Edit'),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: onEdit,
+                      style: ButtonStyle(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                18.0), // Adjust border radius as needed
+                            side: const BorderSide(
+                                color: Colors.black), // Add border side
+                          ),
+                        ),
+                      ),
+                      child: const Text('Edit'),
+                    ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
