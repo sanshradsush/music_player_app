@@ -183,10 +183,7 @@ class _PlayListScreenState extends State<PlayListScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const DeletePlaylistScreen(
-                              // playlists: playlists, 
-                              
-                            ),
+                            builder: (context) => const DeletePlaylistScreen(),
                           ),
                         ).then((_) async {
                           await fetchPlaylists();
