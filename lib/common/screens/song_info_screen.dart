@@ -27,7 +27,7 @@ class SongInfoScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Details', style: Theme.of(context).textTheme.headline6),
+            Text('Details', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 20),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
