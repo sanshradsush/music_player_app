@@ -42,7 +42,7 @@ class MusicSettings {
     try {
       songsLists = await audioQuery.querySongs();
 
-      logger.i('Audio files fetched successfully from the device $songsList');
+      logger.i('Audio files fetched successfully from the device $songsLists');
     } catch (e) {
       logger.e('Error fetching audio files: $e');
     }
