@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:sound_spin/common/screens/delete_playlist_screen.dart';
 import '../enums/song_options.dart';
 import '../models/music_settings_model.dart';
 import 'play_list_bottom_sheet.dart';
@@ -177,8 +178,20 @@ class _PlayListScreenState extends State<PlayListScreen> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.more_vert),
-                      onPressed: () {},
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DeletePlaylistScreen(
+                              // playlists: playlists, 
+                              
+                            ),
+                          ),
+                        ).then((_) async {
+                          await fetchPlaylists();
+                        });
+                      },
                     ),
                   ],
                 )
