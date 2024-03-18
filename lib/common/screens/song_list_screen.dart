@@ -47,9 +47,8 @@ class _SongListScreenState extends State<SongListScreen> {
     super.initState();
     if (widget.isLikedTab) {
       songList = MusicSettings.likedSongsList;
-    } else {
-      updateSelectedSongFromLocalStorage();
     }
+    updateSelectedSongFromLocalStorage();
   }
 
   @override
@@ -90,12 +89,16 @@ class _SongListScreenState extends State<SongListScreen> {
       context: context,
       builder: (context) {
         return DeleteWidget(
-          title: 'Delete SONG',
+          title: 'Delete Song',
           subtitle: 'Are you sure you want to delete ${songModel.title}?',
           onConfirm: () async {
-            await musicSettings.deletePlaylist(
-              playlistId: songModel.id,
+            final status = await musicSettings.deleteSong(
+              song: songModel,
             );
+            if (status) {
+              songList.remove(songModel);
+              setState(() {});
+            }
             // ignore: use_build_context_synchronously
             Navigator.pop(context);
           },
