@@ -122,9 +122,11 @@ class _DeletePlaylistScreenState extends State<DeletePlaylistScreen> {
                     );
                     if (success) {
                       // If playlists are deleted successfully, navigate back
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                     } else {
                       // Handle failure, such as showing a snackbar
+                      // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                         content: Text('Failed to delete playlists.'),
                       ));
