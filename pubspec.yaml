@@ -17,6 +17,7 @@ dependencies:
   device_info_plus: ^9.1.2
   shared_preferences: ^2.2.2
   logger: ^1.0.0
+  share: ^2.0.4
 
 dev_dependencies:
   flutter_test:

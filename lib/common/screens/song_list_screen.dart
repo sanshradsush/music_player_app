@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 
 import '../../widgets/playing_song_screen.dart';
 import '../enums/song_options.dart';
@@ -143,6 +144,10 @@ class _SongListScreenState extends State<SongListScreen> {
           songModel: songModel,
           onTap: (option) async {
             switch (option) {
+              case SongOptions.share:
+                Navigator.pop(context);
+                Share.shareFiles([songModel.data], text: songModel.title);
+                break;
               case SongOptions.info:
                 Navigator.pop(context);
                 _showSongInfoBottonSheet(context, songModel);
