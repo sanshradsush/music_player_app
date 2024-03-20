@@ -257,7 +257,20 @@ class MusicSettings {
       logger.e('Storage permission not granted');
       return false;
     }
+    return true;
+  }
 
+  Future<bool> deletePlaylists(
+      {required List<PlaylistModel> playlistList}) async {
+    try {
+      for (PlaylistModel playList in playlistList) {
+        await audioQuery.removePlaylist(playList.id);
+        logger.i('PlayList deleted successfully');
+      }
+    } catch (e) {
+      logger.e('Error deleted playlist: $e');
+      return false;
+    }
     return true;
   }
 }
