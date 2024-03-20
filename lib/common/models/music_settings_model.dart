@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MusicSettings {
   // Private constructor
@@ -230,6 +232,32 @@ class MusicSettings {
     }
 
     return artworkFuture;
+  }
+
+  //delete song from device
+  Future<bool> deleteSong({required SongModel song}) async {
+    logger.e('Deleting song: ${song.data}');
+    PermissionStatus status = await Permission.manageExternalStorage.status;
+    if (status == PermissionStatus.denied) {
+      logger.e('Storage permission denied');
+      await Permission.manageExternalStorage.request();
+      status = await Permission.manageExternalStorage.status;
+    }
+    if (status == PermissionStatus.granted) {
+      try {
+        bool fileExists = await File(song.data).exists();
+        logger.i('File exists: $fileExists');
+        await File(song.data).delete();
+        logger.i('Song deleted successfully');
+      } catch (e) {
+        logger.e('Error deleting song: $e');
+        return false;
+      }
+    } else {
+      logger.e('Storage permission not granted');
+      return false;
+    }
+    return true;
   }
 
   Future<bool> deletePlaylists(

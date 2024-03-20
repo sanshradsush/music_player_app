@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 
 import '../../widgets/playing_song_screen.dart';
 import '../enums/song_options.dart';
@@ -47,9 +48,8 @@ class _SongListScreenState extends State<SongListScreen> {
     super.initState();
     if (widget.isLikedTab) {
       songList = MusicSettings.likedSongsList;
-    } else {
-      updateSelectedSongFromLocalStorage();
     }
+    updateSelectedSongFromLocalStorage();
   }
 
   @override
@@ -90,12 +90,16 @@ class _SongListScreenState extends State<SongListScreen> {
       context: context,
       builder: (context) {
         return DeleteWidget(
-          title: 'Delete SONG',
+          title: 'Delete Song',
           subtitle: 'Are you sure you want to delete ${songModel.title}?',
           onConfirm: () async {
-            await musicSettings.deletePlaylist(
-              playlistId: songModel.id,
+            final status = await musicSettings.deleteSong(
+              song: songModel,
             );
+            if (status) {
+              songList.remove(songModel);
+              setState(() {});
+            }
             // ignore: use_build_context_synchronously
             Navigator.pop(context);
           },
@@ -140,6 +144,10 @@ class _SongListScreenState extends State<SongListScreen> {
           songModel: songModel,
           onTap: (option) async {
             switch (option) {
+              case SongOptions.share:
+                Navigator.pop(context);
+                Share.shareFiles([songModel.data], text: songModel.title);
+                break;
               case SongOptions.info:
                 Navigator.pop(context);
                 _showSongInfoBottonSheet(context, songModel);
