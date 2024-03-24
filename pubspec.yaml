@@ -18,6 +18,7 @@ dependencies:
   shared_preferences: ^2.2.2
   logger: ^1.0.0
   share: ^2.0.4
+  flutter_headset_detector: ^2.1.0
 
 dev_dependencies:
   flutter_test:

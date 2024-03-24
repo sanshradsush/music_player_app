@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_headset_detector/flutter_headset_detector.dart';
 import 'package:logger/logger.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:provider/provider.dart';
@@ -42,6 +44,9 @@ class _SongListScreenState extends State<SongListScreen> {
   SongModel? selectedSong;
   bool selectedSongLiked = false;
   List<SongModel> songList = [];
+  final _headsetDetector = HeadsetDetector();
+  bool _isHeadSetConnected = false;
+  Timer? _headSetConnectionTimer;
 
   @override
   void initState() {
@@ -50,12 +55,41 @@ class _SongListScreenState extends State<SongListScreen> {
       songList = MusicSettings.likedSongsList;
     }
     updateSelectedSongFromLocalStorage();
+    cheeckHeadsetConnection();
+    listenHeadSetConnection();
+  }
+
+  void cheeckHeadsetConnection() {
+    _headsetDetector.getCurrentState.then((val) {
+      setState(() {
+        _isHeadSetConnected = val.entries
+            .any((element) => element.value == HeadsetState.CONNECTED);
+      });
+    });
+  }
+
+  void listenHeadSetConnection() {
+    _headSetConnectionTimer =
+        Timer.periodic(const Duration(seconds: 3), (timer) {
+      _headsetDetector.getCurrentState.then((val) {
+        setState(() {
+          _isHeadSetConnected = val.entries
+              .any((element) => element.value == HeadsetState.CONNECTED);
+        });
+      });
+    });
   }
 
   @override
   void didUpdateWidget(covariant SongListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     updateSelectedSongFromLocalStorage();
+  }
+
+  @override
+  void dispose() {
+    _headSetConnectionTimer?.cancel();
+    super.dispose();
   }
 
   Future<Uint8List?> getArtwork(int songId) async {
@@ -280,6 +314,11 @@ class _SongListScreenState extends State<SongListScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            if (_isHeadSetConnected)
+                              const IconButton(
+                                onPressed: null,
+                                icon: Icon(Icons.headphones),
+                              ),
                             IconButton(
                               onPressed: () async {
                                 if (selectedSongLiked) {
